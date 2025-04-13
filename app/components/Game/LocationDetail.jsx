@@ -2,7 +2,7 @@
 
 import { useGame } from '@/app/context/GameContext';
 
-import Button from '../UI/Button';
+
 import { locations } from '@/data/locations';
 import { toast } from 'sonner';
 
