@@ -1,0 +1,203 @@
+// components/Game/PlayerSelect.jsx - New component for player selection
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useGame } from '@/app/context/GameContext';
+import MotionWrapperDelay from '../FramerMotion/MotionWrapperDelay';
+import FeatureMotionWrapper from '../FramerMotion/FeatureMotionWrapperMap';
+import SmokeEffect from '../SmokeEffects/SmokeEffect';
+
+export default function PlayerSelect() {
+    const { dispatch } = useGame();
+    const [numPlayers, setNumPlayers] = useState(1);
+    const [playerName, setPlayerName] = useState("Jones");
+    const [playerAvatar, setPlayerAvatar] = useState(1);
+    const [currentPlayer, setCurrentPlayer] = useState(1);
+    const [players, setPlayers] = useState([]);
+
+    const avatars = [
+        '/avatars/person.jpg',
+        '/avatars/person0.jpg',
+        '/avatars/person1.jpg',
+        '/avatars/person2.jpg',
+        '/avatars/person3.jpg',
+        '/avatars/person4.jpg',
+        '/avatars/person5.jpg',
+        '/avatars/person6.jpg',
+        '/avatars/person7.jpg',
+        '/avatars/person8.jpg',
+        '/avatars/person9.jpg',
+        '/avatars/person10.jpg',
+    ];
+
+
+
+    const handleAddPlayer = () => {
+        const newPlayer = {
+            id: currentPlayer,
+            name: playerName || `Player ${currentPlayer}`,
+            avatar: avatars[playerAvatar - 1]
+        };
+
+        setPlayers([...players, newPlayer]);
+
+        if (players.length + 1 < numPlayers) {
+            // Setup for next player
+            setCurrentPlayer(currentPlayer + 1);
+            setPlayerName(`Player ${currentPlayer + 1}`);
+            setPlayerAvatar(1);
+        } else {
+            // Start the game with all players
+            dispatch({
+                type: 'START_GAME',
+                payload: {
+                    players: [...players, newPlayer],
+                    numPlayers
+                }
+            });
+        }
+    };
+
+    return (
+        <motion.div
+            className="player-select bg-gradient-to-b from-black via-indigo-950 to-teal-500 rounded-lg p-6 max-w-2xl mx-auto my-12"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+        >
+            <SmokeEffect isVisible={true} />
+
+            <MotionWrapperDelay
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ duration: 0.9, delay: 0.8 }}
+                variants={{
+                    hidden: { opacity: 0, y: -100 },
+                    visible: { opacity: 1, y: 0 },
+                }}
+            >     <h2 className="text-5xl font-bold text-center mb-6 text-indigo-500 gradient-title">Welcome to Jones in the Fast Lane</h2></MotionWrapperDelay>
+
+
+            {players.length < numPlayers ? (
+                <>
+                    <div className="mb-6">
+
+                        <MotionWrapperDelay
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true, amount: 0.5 }}
+                            transition={{ duration: 0.9, delay: 0.8 }}
+                            variants={{
+                                hidden: { opacity: 0, y: 100 },
+                                visible: { opacity: 1, y: 0 },
+                            }}
+                        >   <h3 className="text-lg mb-5 text-center font-bold">How many players?</h3> </MotionWrapperDelay>
+
+                        <div className="flex justify-center gap-4">
+
+
+                            <MotionWrapperDelay
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true, amount: 0.5 }}
+                                transition={{ duration: 0.9, delay: 0.8 }}
+                                variants={{
+                                    hidden: { opacity: 0, x: -100 },
+                                    visible: { opacity: 1, x: 0 },
+                                }}
+                            >      <motion.button
+                                className={`px-4 py-2 rounded ${numPlayers === 1 ? 'bg-blue-600' : 'bg-gray-600'}`}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => setNumPlayers(1)}
+                            >
+                                    1 Player
+                                </motion.button></MotionWrapperDelay>
+
+
+                            <MotionWrapperDelay
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true, amount: 0.5 }}
+                                transition={{ duration: 0.9, delay: 0.8 }}
+                                variants={{
+                                    hidden: { opacity: 0, x: 100 },
+                                    visible: { opacity: 1, x: 0 },
+                                }}
+                            >      <motion.button
+                                className={`px-4 py-2 rounded ${numPlayers === 2 ? 'bg-blue-600' : 'bg-gray-600'}`}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => setNumPlayers(2)}
+                            >
+                                    2 Players
+                                </motion.button>  </MotionWrapperDelay>
+
+
+                        </div>
+                    </div>
+
+                    <div className="mb-6">
+                        <h3 className="text-lg mb-2">Player {currentPlayer} Name:</h3>
+                        <input
+                            type="text"
+                            value={playerName}
+                            onChange={(e) => setPlayerName(e.target.value)}
+                            className="w-full p-2 bg-gray-700 rounded"
+                            placeholder="Enter your name"
+                        />
+                    </div>
+
+                    <div className="mb-6">
+                        <h3 className="text-lg mb-4 text-center font-bold">Select Avatar:</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 justify-items-center">
+
+                            {avatars.map((avatar, index) => {
+                                const isSelected = playerAvatar === index + 1;
+
+                                return (
+                                    <FeatureMotionWrapper key={index} index={index}>
+                                        <motion.div
+
+                                            className={`relative cursor-pointer flex items-center justify-center transition-all duration-300 ${isSelected ? 'ring-4 ring-blue-400' : ''
+                                                } rounded-full w-32 aspect-square overflow-hidden`}
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => setPlayerAvatar(index + 1)}
+                                        >
+                                            <img
+                                                src={avatar}
+                                                alt={`Avatar ${index + 1}`}
+                                                className="w-full h-full object-cover object-[center_top] rounded-full"
+                                            />
+                                        </motion.div>
+
+                                    </FeatureMotionWrapper>
+
+
+
+
+                                );
+                            })}
+                        </div>
+
+
+                    </div>
+
+                    <motion.button
+                        className="w-full py-3 bg-blue-600 rounded-lg text-white font-bold"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleAddPlayer}
+                    >
+                        {players.length === numPlayers - 1 ? 'Start Game' : 'Next Player'}
+                    </motion.button>
+                </>
+            ) : (
+                <div className="text-center">
+                    <p>Starting game...</p>
+                </div>
+            )}
+        </motion.div>
+    );
+}

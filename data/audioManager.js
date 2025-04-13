@@ -1,0 +1,256 @@
+// WALKING SOUND ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+let audioContext = null;
+let walkingSound = null;
+
+export const initAudio = () => {
+  try {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return true;
+  } catch (error) {
+    console.error("Web Audio API not supported:", error);
+    return false;
+  }
+};
+
+export const loadWalkingSound = async (url) => {
+  if (!audioContext) {
+    if (!initAudio()) return;
+  }
+
+  try {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    walkingSound = audioBuffer;
+    return true;
+  } catch (error) {
+    console.error("Error loading audio:", error);
+    return false;
+  }
+};
+
+let currentSound = null;
+
+export const playWalkingSound = () => {
+  if (!audioContext || !walkingSound) return;
+
+  // Stop previous sound if playing
+  if (currentSound) {
+    currentSound.stop();
+  }
+
+  // Create new source
+  const soundSource = audioContext.createBufferSource();
+  soundSource.buffer = walkingSound;
+  soundSource.loop = true;
+  soundSource.connect(audioContext.destination);
+  soundSource.start();
+
+  currentSound = soundSource;
+  return soundSource;
+};
+
+export const stopWalkingSound = () => {
+  if (currentSound) {
+    currentSound.stop();
+    currentSound = null;
+  }
+};
+
+//BANK MUSIC ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+let bankMusic = null;
+let bankMusicSource = null;
+
+export const loadBankMusic = async (url) => {
+  if (!audioContext) {
+    if (!initAudio()) return;
+  }
+
+  try {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    bankMusic = audioBuffer;
+    return true;
+  } catch (error) {
+    console.error("Error loading bank music:", error);
+    return false;
+  }
+};
+
+export const playBankMusic = () => {
+  if (!audioContext || !bankMusic) return;
+
+  // Stop previous music if playing
+  if (bankMusicSource) {
+    bankMusicSource.stop();
+  }
+
+  // Create new source
+  const musicSource = audioContext.createBufferSource();
+  musicSource.buffer = bankMusic;
+  musicSource.loop = true;
+  musicSource.connect(audioContext.destination);
+  musicSource.start();
+
+  bankMusicSource = musicSource;
+  return musicSource;
+};
+
+export const stopBankMusic = () => {
+  if (bankMusicSource) {
+    bankMusicSource.stop();
+    bankMusicSource = null;
+  }
+};
+
+// EMPLOYMENT MUSIC +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// data/audioManager.js
+// Add these new functions to the existing file:
+
+let employmentMusic = null;
+let employmentMusicSource = null;
+
+export const loadEmploymentMusic = async (url) => {
+  if (!audioContext) {
+    if (!initAudio()) return;
+  }
+
+  try {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    employmentMusic = audioBuffer;
+    return true;
+  } catch (error) {
+    console.error("Error loading employment office music:", error);
+    return false;
+  }
+};
+
+export const playEmploymentMusic = () => {
+  if (!audioContext || !employmentMusic) return;
+
+  // Stop previous music if playing
+  if (employmentMusicSource) {
+    employmentMusicSource.stop();
+  }
+
+  // Create new source
+  const musicSource = audioContext.createBufferSource();
+  musicSource.buffer = employmentMusic;
+  musicSource.loop = true;
+  musicSource.connect(audioContext.destination);
+  musicSource.start();
+
+  employmentMusicSource = musicSource;
+  return musicSource;
+};
+
+export const stopEmploymentMusic = () => {
+  if (employmentMusicSource) {
+    employmentMusicSource.stop();
+    employmentMusicSource = null;
+  }
+};
+
+// Mall Music ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+let mallMusic = null;
+let mallMusicSource = null;
+
+export const loadMallMusic = async (url) => {
+  if (!audioContext) {
+    if (!initAudio()) return;
+  }
+
+  try {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    mallMusic = audioBuffer;
+    return true;
+  } catch (error) {
+    console.error("Error loading mall music:", error);
+    return false;
+  }
+};
+
+export const playMallMusic = () => {
+  if (!audioContext || !mallMusic) return;
+
+  // Stop previous music if playing
+  if (mallMusicSource) {
+    mallMusicSource.stop();
+  }
+
+  // Create new source
+  const musicSource = audioContext.createBufferSource();
+  musicSource.buffer = mallMusic;
+  musicSource.loop = true;
+  musicSource.connect(audioContext.destination);
+  musicSource.start();
+
+  mallMusicSource = musicSource;
+  return musicSource;
+};
+
+export const stopMallMusic = () => {
+  if (mallMusicSource) {
+    mallMusicSource.stop();
+    mallMusicSource = null;
+  }
+};
+
+//LEISURE MUSIC
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+let leisureMusic = null;
+let leisureMusicSource = null;
+
+export const loadLeisureMusic = async (url) => {
+  if (!audioContext) {
+    if (!initAudio()) return;
+  }
+
+  try {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    leisureMusic = audioBuffer;
+    return true;
+  } catch (error) {
+    console.error("Error loading leisure music:", error);
+    return false;
+  }
+};
+
+export const playLeisureMusic = () => {
+  if (!audioContext || !leisureMusic) return;
+
+  // Stop previous music if playing
+  if (leisureMusicSource) {
+    leisureMusicSource.stop();
+  }
+
+  // Create new source
+  const musicSource = audioContext.createBufferSource();
+  musicSource.buffer = leisureMusic;
+  musicSource.loop = true;
+  musicSource.connect(audioContext.destination);
+  musicSource.start();
+
+  leisureMusicSource = musicSource;
+  return musicSource;
+};
+
+export const stopLeisureMusic = () => {
+  if (leisureMusicSource) {
+    leisureMusicSource.stop();
+    leisureMusicSource = null;
+  }
+};
