@@ -17,6 +17,10 @@ import WinNotification from './WinNotification';
 import Bank from './Bank';
 import SharesMarket from './SharesMarket';
 import LeisureCentre from './LeisureCentre';
+import SaveLoadMenu from './SaveLoadMenu';
+import Workplace from './WorkPlace';
+import University from './University';
+import Apartment from './Apartment';
 
 export default function GameContainer() {
     const { state, dispatch } = useGame();
@@ -63,10 +67,18 @@ export default function GameContainer() {
                 return <ShoppingMall />;
             case 'bank':
                 return <Bank />
+            case 'workplace':
+                return <Workplace />;
+            case 'university':  // Add this case
+                return <University />;
+            case 'apartment':
+                return <Apartment />;
             case 'shares':
                 return <SharesMarket />;
             case 'leisure':  // Add this new case
                 return <LeisureCentre />;
+            case 'saveload':
+                return <SaveLoadMenu />;
             default:
                 return <Map />;
         }

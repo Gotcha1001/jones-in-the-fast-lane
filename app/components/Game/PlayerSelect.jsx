@@ -28,6 +28,14 @@ export default function PlayerSelect() {
         '/avatars/person9.jpg',
         '/avatars/person10.jpg',
         '/avatars/sexygirl.jpg',
+        '/avatars/sexygirl1.jpg',
+        '/avatars/sexygirl2.jpg',
+        '/avatars/sexygirl3.jpg',
+        '/avatars/sexygirl4.jpg',
+        '/avatars/sexyguy1.jpg',
+        '/avatars/sexyguy2.jpg',
+        '/avatars/sexyguy3.jpg',
+        '/avatars/sexyguy4.jpg',
         '/avatars/sexyguy.jpg',
     ];
 

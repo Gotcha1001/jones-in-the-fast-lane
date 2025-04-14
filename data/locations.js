@@ -1,4 +1,5 @@
 export const locations = {
+  // In locations.js, update the apartment entry:
   apartment: {
     name: "Apartment",
     description: "Your humble abode",
@@ -6,8 +7,9 @@ export const locations = {
       "https://img.freepik.com/free-photo/3d-electric-car-building_23-2148972401.jpg",
     mapX: 50, // % position on map
     mapY: 20, // % position on map
-    actions: ["sleep", "checkGoals"],
+    actions: ["sleep", "checkGoals", "apartment"], // Add "apartment" action
   },
+
   university: {
     name: "University",
     description: "Increase your education",
@@ -32,7 +34,7 @@ export const locations = {
       "https://img.freepik.com/premium-photo/midsection-businessman-using-laptop-table_1048944-3345650.jpg",
     mapX: 65,
     mapY: 55,
-    actions: ["work"],
+    actions: ["work", "workplace"],
   },
   mall: {
     name: "Shopping Mall",

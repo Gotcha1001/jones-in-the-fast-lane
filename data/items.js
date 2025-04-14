@@ -1,20 +1,3 @@
-// data/items.js
-// export const shopItems = [
-//   { name: "Fast Food", price: 10, energy: 20, happiness: 5, image: "🍔" },
-//   {
-//     name: "Restaurant Meal",
-//     price: 30,
-//     energy: 40,
-//     happiness: 15,
-//     image: "🍝",
-//   },
-//   { name: "Basic Clothes", price: 50, happiness: 10, image: "👕" },
-//   { name: "Nice Outfit", price: 120, happiness: 25, image: "👔" },
-//   { name: "Smartphone", price: 200, happiness: 20, image: "📱" },
-//   { name: "Computer", price: 800, happiness: 30, eduBonus: 5, image: "💻" },
-//   { name: "Car", price: 2000, happiness: 40, timeBonus: 20, image: "🚗" },
-// ];
-
 export const shopItems = [
   { name: "Fast Food", price: 10, energy: 20, happiness: 5, image: "🍔" },
   {

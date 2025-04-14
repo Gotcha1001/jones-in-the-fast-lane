@@ -16,11 +16,18 @@ export default function SharesMarket() {
     const [selectedShare, setSelectedShare] = useState(null);
 
     // Load player's shares from state if they exist
+    // In SharesMarket.jsx, modify the useEffect hook that loads player's shares:
+
     useEffect(() => {
-        if (player.shares) {
+        if (player.shares && player.shares.length > 0) {
+            // Create a new array that merges the default share data with player's ownership data
             const updatedShares = shares.map(share => {
                 const playerShare = player.shares.find(s => s.id === share.id);
-                return playerShare ? { ...share, owned: playerShare.owned } : share;
+                return playerShare ? {
+                    ...share,
+                    owned: playerShare.owned,
+                    price: playerShare.price || share.price // Use the player's saved price if available
+                } : share;
             });
             setShares(updatedShares);
         }
@@ -33,6 +40,8 @@ export default function SharesMarket() {
             updateSharePrices();
         }
     }, [player.week]);
+
+
 
     const updateSharePrices = () => {
         const updatedShares = shares.map(share => {
@@ -154,7 +163,7 @@ export default function SharesMarket() {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-2 bg-gray-700 rounded">
                             <span className="text-gray-400">Cash:</span>
-                            <span className="ml-2 text-green-400">${player.cash}</span>
+                            <span className="ml-2 text-green-400">${player.cash.toFixed(2)}</span>
                         </div>
                         <div className="p-2 bg-gray-700 rounded">
                             <span className="text-gray-400">Portfolio Value:</span>
@@ -181,10 +190,21 @@ export default function SharesMarket() {
                             </thead>
                             <tbody>
                                 {shares.map(share => (
-                                    <tr key={share.id} className="border-t border-gray-800">
+                                    <tr
+                                        key={share.id}
+                                        className={`border-t border-gray-800 ${share.owned > 0
+                                                ? 'bg-gradient-to-r from-indigo-900 to-indigo-800'
+                                                : ''
+                                            }`}
+                                    >
                                         <td className="py-2 px-4">{share.name}</td>
                                         <td className="py-2 px-4 text-right">${share.price.toFixed(2)}</td>
-                                        <td className={`py-2 px-4 text-right ${share.change > 0 ? 'text-green-500' : share.change < 0 ? 'text-red-500' : 'text-gray-400'}`}>
+                                        <td className={`py-2 px-4 text-right ${share.change > 0
+                                                ? 'text-green-500'
+                                                : share.change < 0
+                                                    ? 'text-red-500'
+                                                    : 'text-gray-400'
+                                            }`}>
                                             {share.change > 0 ? `+${share.change.toFixed(1)}%` : `${share.change.toFixed(1)}%`}
                                         </td>
                                         <td className="py-2 px-4 text-right">{share.owned}</td>
@@ -192,7 +212,10 @@ export default function SharesMarket() {
                                         <td className="py-2 px-4 text-center">
                                             <button
                                                 onClick={() => setSelectedShare(share.id)}
-                                                className={`w-6 h-6 rounded-full ${selectedShare === share.id ? 'bg-blue-500' : 'bg-gray-700'}`}
+                                                className={`w-6 h-6 rounded-full ${selectedShare === share.id
+                                                        ? 'bg-blue-500'
+                                                        : 'bg-gray-700'
+                                                    }`}
                                             ></button>
                                         </td>
                                     </tr>

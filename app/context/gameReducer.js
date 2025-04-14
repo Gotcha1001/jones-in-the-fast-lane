@@ -5,7 +5,47 @@ function gameReducer(state, action) {
   console.log("State before:", state);
 
   switch (action.type) {
-    // Leisure activity action
+    case "SAVE_GAME":
+      const saveSuccess = saveGame(state);
+      return {
+        ...state,
+        message: saveSuccess
+          ? "Game saved successfully!"
+          : "Failed to save the game.",
+      };
+
+    case "LOAD_GAME":
+      const savedGame = action.payload.savedGame;
+      if (!savedGame) {
+        return {
+          ...state,
+          message: "No saved game found or error loading game.",
+        };
+      }
+      return {
+        ...savedGame,
+        message: "Game loaded successfully!",
+      };
+
+    // Add this to your existing gameReducer.js file within the switch statement
+
+    case "STUDY_ADVANCED":
+      const hours = action.payload.hours;
+      // Calculate education gain based on current level (better efficiency as you learn)
+      const baseGain = 2;
+      const efficiency = 1 + state.player.education / 100; // Efficiency increases with education
+      const educationGain = Math.floor(baseGain * hours * efficiency);
+
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          education: Math.min(state.player.education + educationGain, 100),
+          energy: state.player.energy - hours * 2, // Each hour costs 2 energy
+        },
+        message: `You studied for ${hours} hours and gained ${educationGain} education points!`,
+      };
+
     // This action is dispatched when the player chooses to do a leisure activity
 
     case "DO_LEISURE_ACTIVITY":
@@ -70,25 +110,14 @@ function gameReducer(state, action) {
         message: `You earned $${interest} in interest!`,
       };
 
-    // Add these case statements to your gameReducer function
-
     case "BUY_SHARES":
+      // Simply use the shares data from the payload directly
       return {
         ...state,
         player: {
           ...state.player,
           cash: state.player.cash - action.payload.cost,
-          shares: state.player.shares
-            ? state.player.shares.map((share) =>
-                share.id === action.payload.shareId
-                  ? { ...share, owned: share.owned + action.payload.amount }
-                  : share
-              )
-            : action.payload.shares.map((share) => ({
-                id: share.id,
-                name: share.name,
-                owned: share.owned,
-              })),
+          shares: action.payload.shares,
         },
         message: `You bought ${action.payload.amount} shares for $${action.payload.cost}.`,
       };
@@ -99,26 +128,38 @@ function gameReducer(state, action) {
         player: {
           ...state.player,
           cash: state.player.cash + action.payload.value,
-          shares: state.player.shares.map((share) =>
-            share.id === action.payload.shareId
-              ? { ...share, owned: share.owned - action.payload.amount }
-              : share
-          ),
+          shares: action.payload.shares,
         },
         message: `You sold ${action.payload.amount} shares for $${action.payload.value}.`,
       };
 
     case "UPDATE_SHARES":
+      // Get current owned shares
+      const currentShares = state.player.shares || [];
+
+      // Update prices while preserving ownership AND change values
+      const newShares = action.payload.shares
+        .filter((share) => {
+          // Keep all shares that player owns
+          const ownedShare = currentShares.find((s) => s.id === share.id);
+          return ownedShare && ownedShare.owned > 0;
+        })
+        .map((share) => {
+          const ownedShare = currentShares.find((s) => s.id === share.id);
+          return {
+            id: share.id,
+            name: share.name,
+            price: share.price,
+            owned: ownedShare ? ownedShare.owned : 0,
+            change: share.change, // Make sure to include the change property
+          };
+        });
+
       return {
         ...state,
         player: {
           ...state.player,
-          shares: action.payload.shares.map((share) => ({
-            id: share.id,
-            name: share.name,
-            price: share.price,
-            owned: share.owned,
-          })),
+          shares: newShares,
         },
         message: "Stock market prices have been updated!",
       };

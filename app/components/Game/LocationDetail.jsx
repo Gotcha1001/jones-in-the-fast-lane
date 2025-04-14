@@ -37,8 +37,43 @@ export default function LocationDetail({ locationId }) {
                 }
                 break;
 
+            // case 'study':
+            //     if (player.energy < 10) {
+            //         dispatch({
+            //             type: 'SET_MESSAGE',
+            //             payload: { text: "You're too tired to study!" }
+            //         });
+            //     } else if (player.education >= 100) {
+            //         dispatch({
+            //             type: 'SET_MESSAGE',
+            //             payload: { text: "You've reached maximum education!" }
+            //         });
+            //     } else {
+            //         dispatch({ type: 'STUDY' });
+            //         dispatch({ type: 'USE_TIME', payload: { amount: 15 } });
+            //         console.log("Dispatched USE_TIME with amount:", 15);
+            //     }
+            //     break;
+
+            // In your handleAction function in LocationDetail.jsx, you might want to update the study case:
+
+
+            // In LocationDetail.jsx, add to the handleAction function:
+            case 'apartment':
+                dispatch({
+                    type: 'CHANGE_SCREEN',
+                    payload: { screen: 'apartment' }
+                });
+                break;
+
             case 'study':
-                if (player.energy < 10) {
+                if (player.location === 'university') {
+                    // If at university, go to university screen
+                    dispatch({
+                        type: 'CHANGE_SCREEN',
+                        payload: { screen: 'university' }
+                    });
+                } else if (player.energy < 10) {
                     dispatch({
                         type: 'SET_MESSAGE',
                         payload: { text: "You're too tired to study!" }
@@ -51,7 +86,6 @@ export default function LocationDetail({ locationId }) {
                 } else {
                     dispatch({ type: 'STUDY' });
                     dispatch({ type: 'USE_TIME', payload: { amount: 15 } });
-                    console.log("Dispatched USE_TIME with amount:", 15);
                 }
                 break;
 
@@ -72,6 +106,15 @@ export default function LocationDetail({ locationId }) {
                     console.log("Dispatched USE_TIME with amount:", 15);
                 }
                 break;
+
+            case 'workplace':
+                dispatch({
+                    type: 'CHANGE_SCREEN',
+                    payload: { screen: 'workplace' }
+                });
+                break;
+
+
 
             case 'relax':
                 if (player.energy < 5) {
@@ -117,6 +160,8 @@ export default function LocationDetail({ locationId }) {
                     }
                 });
                 break;
+
+
 
             case 'deposit':
                 const depositAmount = action.amount || 50; // Default or use modal for custom amount
@@ -212,10 +257,28 @@ export default function LocationDetail({ locationId }) {
                                     actionName = 'Study';
                                     actionDesc = 'Gain education (Takes 15 time units, costs 10 energy)';
                                     break;
+
+
+                                //action to actually do work and earn money
                                 case 'work':
                                     actionName = player.job ? `Work as ${player.job.title}` : 'No job yet';
                                     actionDesc = player.job ? `Earn $${player.job.salary} (Takes 20 time units, costs 15 energy)` : 'Visit Employment Office to get a job';
                                     break;
+
+                                //action to go to the workplace interface
+                                case 'workplace':
+                                    actionName = 'Visit Workplace';
+                                    actionDesc = 'Go to your workplace interface';
+                                    break;
+
+
+                                case 'apartment':
+                                    actionName = 'Enter Apartment';
+                                    actionDesc = 'Visit your home to rest and organize';
+                                    break;
+
+
+
                                 case 'relax':
                                     actionName = 'Relax';
                                     actionDesc = 'Increase happiness (Takes 10 time units, costs 5 energy)';

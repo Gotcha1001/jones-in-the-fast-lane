@@ -1,9 +1,9 @@
+
 "use client"
 import { useReducer, useEffect } from 'react';
 import GameContext from './GameContext';
 import initialState from './initialState';
 import gameReducer from './gameReducer';
-
 
 
 function GameProvider({ children }) {
@@ -26,3 +26,4 @@ function GameProvider({ children }) {
 }
 
 export default GameProvider;
+

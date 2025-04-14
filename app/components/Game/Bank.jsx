@@ -135,7 +135,7 @@ export default function Bank() {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-2 bg-gray-700 rounded">
                             <span className="text-gray-400">Cash:</span>
-                            <span className="ml-2 text-green-400">${player.cash}</span>
+                            <span className="ml-2 text-green-400">${player.cash.toFixed(2)}</span>
                         </div>
                         <div className="p-2 bg-gray-700 rounded">
                             <span className="text-gray-400">Savings:</span>

@@ -11,6 +11,22 @@ export default function Stats() {
         dispatch({ type: 'CHECK_GOALS' });
     };
 
+    // In Stats.jsx
+    const openSaveLoadMenu = () => {
+        dispatch({
+            type: 'CHANGE_SCREEN',
+            payload: { screen: 'saveload' }
+        });
+    };
+
+    // Then add this button somewhere in your Stats component
+    <button
+        onClick={openSaveLoadMenu}
+        className="bg-blue-500 hover:bg-blue-400 text-white px-2 py-1 rounded text-sm"
+    >
+        Save/Load
+    </button>
+
     return (
         <div className="bg-black rounded-lg p-4 mb-4">
             <div className="flex justify-between items-center mb-2">
@@ -21,7 +37,7 @@ export default function Stats() {
                 </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <div className="bg-gray-800 p-2 rounded">Cash: ${player.cash}</div>
+                <div className="bg-gray-800 p-2 rounded">Cash: ${player.cash.toFixed(2)}</div>
                 <div className="bg-gray-800 p-2 rounded">Education: {player.education}/100</div>
                 <div className="bg-gray-800 p-2 rounded">Experience: {player.experience}/100</div>
                 <div className="bg-gray-800 p-2 rounded">Job: {player.job ? player.job.title : 'Unemployed'}</div>
@@ -39,6 +55,12 @@ export default function Stats() {
                         Check Goals
                     </button>
                 </div>
+                <button
+                    onClick={openSaveLoadMenu}
+                    className="bg-blue-500 hover:bg-blue-400 text-white px-2 py-1 rounded text-sm"
+                >
+                    Save/Load
+                </button>
             </div>
         </div>
     );

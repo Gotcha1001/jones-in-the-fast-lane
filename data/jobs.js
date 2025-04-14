@@ -1,12 +1,3 @@
-// export const jobs = [
-//   { title: "Fast Food Worker", salary: 50, eduReq: 0, expReq: 0 },
-//   { title: "Retail Clerk", salary: 80, eduReq: 10, expReq: 10 },
-//   { title: "Office Assistant", salary: 120, eduReq: 30, expReq: 20 },
-//   { title: "Technician", salary: 180, eduReq: 50, expReq: 30 },
-//   { title: "Manager", salary: 250, eduReq: 70, expReq: 50 },
-//   { title: "Executive", salary: 400, eduReq: 90, expReq: 80 },
-// ];
-
 export const jobs = [
   { title: "Fast Food Worker", salary: 50, eduReq: 0, expReq: 0 },
   { title: "Retail Clerk", salary: 80, eduReq: 10, expReq: 10 },

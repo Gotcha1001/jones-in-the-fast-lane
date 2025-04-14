@@ -254,3 +254,151 @@ export const stopLeisureMusic = () => {
     leisureMusicSource = null;
   }
 };
+
+// Add this to your audioManager.js file below the bankMusic section
+//WORK MUSIC
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+let workMusic = null;
+let workMusicSource = null;
+
+export const loadWorkMusic = async (url) => {
+  if (!audioContext) {
+    if (!initAudio()) return;
+  }
+
+  try {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    workMusic = audioBuffer;
+    return true;
+  } catch (error) {
+    console.error("Error loading work music:", error);
+    return false;
+  }
+};
+
+export const playWorkMusic = () => {
+  if (!audioContext || !workMusic) return;
+
+  // Stop previous music if playing
+  if (workMusicSource) {
+    workMusicSource.stop();
+  }
+
+  // Create new source
+  const musicSource = audioContext.createBufferSource();
+  musicSource.buffer = workMusic;
+  musicSource.loop = true;
+  musicSource.connect(audioContext.destination);
+  musicSource.start();
+
+  workMusicSource = musicSource;
+  return musicSource;
+};
+
+export const stopWorkMusic = () => {
+  if (workMusicSource) {
+    workMusicSource.stop();
+    workMusicSource = null;
+  }
+};
+
+// UNIVERSITY MUSIC
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+let universityMusic = null;
+let universityMusicSource = null;
+
+export const loadUniversityMusic = async (url) => {
+  if (!audioContext) {
+    if (!initAudio()) return;
+  }
+
+  try {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    universityMusic = audioBuffer;
+    return true;
+  } catch (error) {
+    console.error("Error loading university music:", error);
+    return false;
+  }
+};
+
+export const playUniversityMusic = () => {
+  if (!audioContext || !universityMusic) return;
+
+  // Stop previous music if playing
+  if (universityMusicSource) {
+    universityMusicSource.stop();
+  }
+
+  // Create new source
+  const musicSource = audioContext.createBufferSource();
+  musicSource.buffer = universityMusic;
+  musicSource.loop = true;
+  musicSource.connect(audioContext.destination);
+  musicSource.start();
+
+  universityMusicSource = musicSource;
+  return musicSource;
+};
+
+export const stopUniversityMusic = () => {
+  if (universityMusicSource) {
+    universityMusicSource.stop();
+    universityMusicSource = null;
+  }
+};
+
+// HOME MUSIC
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+let homeMusic = null;
+let homeMusicSource = null;
+
+export const loadHomeMusic = async (url) => {
+  if (!audioContext) {
+    if (!initAudio()) return;
+  }
+
+  try {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    homeMusic = audioBuffer;
+    return true;
+  } catch (error) {
+    console.error("Error loading home music:", error);
+    return false;
+  }
+};
+
+export const playHomeMusic = () => {
+  if (!audioContext || !homeMusic) return;
+
+  // Stop previous music if playing
+  if (homeMusicSource) {
+    homeMusicSource.stop();
+  }
+
+  // Create new source
+  const musicSource = audioContext.createBufferSource();
+  musicSource.buffer = homeMusic;
+  musicSource.loop = true;
+  musicSource.connect(audioContext.destination);
+  musicSource.start();
+
+  homeMusicSource = musicSource;
+  return musicSource;
+};
+
+export const stopHomeMusic = () => {
+  if (homeMusicSource) {
+    homeMusicSource.stop();
+    homeMusicSource = null;
+  }
+};
