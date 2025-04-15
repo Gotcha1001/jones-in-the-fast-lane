@@ -2,6 +2,8 @@
 import { useGame } from '@/app/context/GameContext';
 import { initAudio, loadLeisureMusic, playLeisureMusic, stopLeisureMusic } from '@/data/audioManager';
 import { useState, useEffect } from 'react';
+import FeatureMotionWrapper from '../FramerMotion/FeatureMotionWrapperMap';
+import MotionWrapperDelay from '../FramerMotion/MotionWrapperDelay';
 
 export default function LeisureCentre() {
     const { state, dispatch } = useGame();
@@ -140,6 +142,8 @@ export default function LeisureCentre() {
 
             {/* Leisure Centre content */}
             <div className="relative z-10 p-4">
+
+
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold">Python Leisure Centre</h2>
                     <button
@@ -153,27 +157,47 @@ export default function LeisureCentre() {
                 {/* Staff Image */}
                 <div className="flex mb-4">
                     <div className="flex-shrink-0 mr-4">
-                        <img
-                            src="/leisurelady.jpg"
-                            alt="Leisure Centre Staff"
-                            className="w-32 h-32 rounded-full border-2 border-purple-500 shadow-lg"
-                            onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = "https://img.freepik.com/free-photo/portrait-young-sportive-girl-training-with-dumbbells-isolated-blue-wall_155003-14158.jpg";
+                        <MotionWrapperDelay
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true, amount: 0.7 }}
+                            transition={{ duration: 0.9, delay: 0.8 }}
+                            variants={{
+                                hidden: { opacity: 0, y: -100 },
+                                visible: { opacity: 1, y: 0 },
                             }}
-                        />
-                    </div>
-                    <div className="bg-gradient-to-r from-purple-500 via-blue-900 to-black p-3 rounded-lg shadow-md">
-                        <p className="text-sm italic text-gray-300">
-                            "Welcome to Python Leisure Centre! Take a break from your busy life and enjoy our fantastic facilities. Whether you want to swim, work out, or just relax, we've got you covered!"
-                        </p>
-                    </div>
-                </div>
+                        >        <img
+                                src="/leisurelady.jpg"
+                                alt="Leisure Centre Staff"
+                                className="w-32 h-32 rounded-full border-2 border-purple-500 shadow-lg object-cover object-[center_top]"
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = "https://img.freepik.com/free-photo/portrait-young-sportive-girl-training-with-dumbbells-isolated-blue-wall_155003-14158.jpg";
+                                }}
+                            /> </MotionWrapperDelay>
 
+                    </div>
+
+                    <MotionWrapperDelay
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, amount: 0.7 }}
+                        transition={{ duration: 0.9, delay: 0.8 }}
+                        variants={{
+                            hidden: { opacity: 0, x: -100 },
+                            visible: { opacity: 1, x: 0 },
+                        }}
+                    >    <div className="bg-gradient-to-r from-purple-500 via-blue-900 to-black p-3 rounded-lg shadow-md">
+                            <p className="text-sm italic text-gray-300">
+                                "Welcome to Python Leisure Centre! Take a break from your busy life and enjoy our fantastic facilities. Whether you want to swim, work out, or just relax, we've got you covered!"
+                            </p>
+                        </div> </MotionWrapperDelay>
+
+                </div>
                 {/* Player Information */}
-                <div className="bg-gray-800 p-4 rounded mb-4">
+                <div className=" p-4 rounded mb-4">
                     <h3 className="text-lg font-semibold mb-2">Your Status</h3>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="p-2 bg-gray-700 rounded">
                             <span className="text-gray-400">Cash:</span>
                             <span className="ml-2 text-green-400">${player.cash.toFixed(2)}</span>
@@ -189,8 +213,9 @@ export default function LeisureCentre() {
                     </div>
                 </div>
 
+
                 {/* Visual representation of happiness */}
-                <div className="bg-gray-800 p-4 rounded mb-4">
+                <div className="p-4 rounded mb-4">
                     <h3 className="text-lg font-semibold mb-2">Your Happiness Level</h3>
                     <div className="flex justify-center items-center h-12 space-x-2 mb-2">
                         {player.happiness > 0 ? (
@@ -211,23 +236,28 @@ export default function LeisureCentre() {
                 <div className="bg-gray-800 p-4 rounded mb-4">
                     <h3 className="text-lg font-semibold mb-2">Available Activities</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {Object.keys(activities).map(activityKey => (
-                            <div
-                                key={activityKey}
-                                className={`p-3 rounded-lg cursor-pointer transition-all duration-200 ${selectedActivity === activityKey ? 'bg-purple-700 border-2 border-purple-400' : 'bg-gray-700 hover:bg-gray-600'}`}
-                                onClick={() => handleActivitySelect(activityKey)}
-                            >
-                                <h4 className="font-semibold">{activities[activityKey].name}</h4>
-                                <p className="text-sm text-gray-300">{activities[activityKey].description}</p>
-                                <div className="mt-2 flex justify-between text-xs">
-                                    <span className="text-green-400">Cost: ${activities[activityKey].cost}</span>
-                                    <span className="text-blue-400">Energy: -{activities[activityKey].energy}</span>
-                                    <span className="text-yellow-400">+{activities[activityKey].happiness} Happiness</span>
+                        {Object.entries(activities).map(([activityKey, activityValue], index) => (
+                            <FeatureMotionWrapper key={activityKey} index={index}>
+                                <div
+                                    className={`p-3 rounded-lg cursor-pointer transition-all duration-200 ${selectedActivity === activityKey
+                                        ? 'bg-purple-700 border-2 border-purple-400'
+                                        : 'bg-gray-700 hover:bg-gray-600'
+                                        }`}
+                                    onClick={() => handleActivitySelect(activityKey)}
+                                >
+                                    <h4 className="font-semibold">{activityValue.name}</h4>
+                                    <p className="text-sm text-gray-300">{activityValue.description}</p>
+                                    <div className="mt-2 flex justify-between text-xs">
+                                        <span className="text-green-400">Cost: ${activityValue.cost}</span>
+                                        <span className="text-blue-400">Energy: -{activityValue.energy}</span>
+                                        <span className="text-yellow-400">+{activityValue.happiness} Happiness</span>
+                                    </div>
                                 </div>
-                            </div>
+                            </FeatureMotionWrapper>
                         ))}
                     </div>
                 </div>
+
 
                 {/* Selected Activity */}
                 <div className="bg-gray-800 p-4 rounded mb-4">

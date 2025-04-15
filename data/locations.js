@@ -1,4 +1,14 @@
 export const locations = {
+  // In locations.js, update the rentoffice entry:
+  rentoffice: {
+    name: "Rental Office",
+    description: "Manage your apartment rental and pay your rent here.",
+    image: "/rent.jpg",
+    mapX: 35,
+    mapY: 50,
+    actions: ["rentoffice"], // This should redirect to your RentalOffice component
+  },
+
   // In locations.js, update the apartment entry:
   apartment: {
     name: "Apartment",

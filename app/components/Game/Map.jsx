@@ -4,6 +4,7 @@ import { useGame } from '@/app/context/GameContext';
 import { initAudio, loadWalkingSound, playWalkingSound, stopWalkingSound } from '@/data/audioManager';
 import { locations } from '@/data/locations';
 import { useState, useEffect, useMemo } from 'react';
+import { motion } from 'framer-motion';
 
 export default function Map() {
     const { state, dispatch } = useGame();
@@ -427,8 +428,13 @@ export default function Map() {
                             transform: 'translate(-50%, -50%)'
                         }}
                     >
-                        <div className={`${isMobile ? 'h-12 w-12' : 'h-20 w-20'} bg-blue-600 rounded-full flex items-center justify-center shadow-lg border-2 border-yellow-400`}>
-                            <img src={player.avatar} alt={player.name} className={`${isMobile ? 'h-12 w-12' : 'h-20 w-20'} rounded-full z-10`} />
+                        <div className={`${isMobile ? 'h-12 w-12' : 'h-20 w-20'} bg-blue-600 rounded-full flex items-center justify-center shadow-lg relative`}>
+                            <div className="absolute inset-0 rounded-full border-2 border-yellow-400 z-20"></div>
+                            <img
+                                src={player.avatar}
+                                alt={player.name}
+                                className={`${isMobile ? 'h-10 w-10' : 'h-18 w-18'} rounded-full z-10`}
+                            />
                         </div>
                         <div className="mt-1 bg-black px-2 py-1 rounded text-xs text-center shadow-md">
                             {player.name}
@@ -447,9 +453,13 @@ export default function Map() {
                         }}
                     >
                         <div className={`${isMobile ? 'h-16 w-16' : 'h-20 w-20'} rounded-full flex items-center justify-center shadow-lg relative`}>
-                            <div className="absolute inset-0 rounded-full border-4 border-yellow-400 animate-pulse shadow-lg"></div>
-                            <div className={`${isMobile ? 'h-16 w-16' : 'h-20 w-20'} bg-indigo-600 rounded-full flex items-center justify-center z-10`}>
-                                <img src={player.avatar} alt={player.name} className={`${isMobile ? 'h-16 w-16' : 'h-26 w-20'} rounded-full z-10`} />
+                            <div className="absolute inset-0 rounded-full border-4 border-yellow-400 animate-pulse z-20"></div>
+                            <div className={`${isMobile ? 'h-14 w-14' : 'h-18 w-18'} bg-indigo-600 rounded-full flex items-center justify-center z-10 m-1`}>
+                                <img
+                                    src={player.avatar}
+                                    alt={player.name}
+                                    className={`${isMobile ? 'h-14 w-14' : 'h-18 w-18'} rounded-full`}
+                                />
                             </div>
                         </div>
                         <div className="mt-2 bg-black px-3 py-1 rounded text-sm text-center font-bold shadow-md">
@@ -513,21 +523,29 @@ export default function Map() {
                             }}
                             onClick={() => isCurrent ? enterLocation(id) : walkToLocation(id)}
                         >
-                            <div className={`location-marker ${isCurrent ? 'bg-green-500' : isTarget ? 'bg-amber-500' : 'bg-indigo-500'} 
-                                ${isMobile ? 'h-16 w-16 md:h-24 md:w-24' : 'h-24 w-24 md:h-40 md:w-40'} rounded-full flex items-center justify-center cursor-pointer shadow-lg border-2 
-                                ${isCurrent ? 'border-yellow-400 border-4' : isTarget ? 'border-amber-300 border-4' : 'border-white'}`}>
+                            <motion.div
+                                className={`location-marker relative ${isCurrent ? 'bg-green-500' : isTarget ? 'bg-amber-500' : 'bg-indigo-500'} 
+                                ${isMobile ? 'h-16 w-16 md:h-24 md:w-24' : 'h-24 w-24 md:h-40 md:w-40'} rounded-full flex items-center justify-center cursor-pointer shadow-lg`}
+                                whileHover={{
+                                    scale: 1.1,
+                                    transition: { duration: 0.2 }
+                                }}
+                                whileTap={{
+                                    scale: 0.95
+                                }}
+                            >
+                                <div className={`absolute inset-0 rounded-full ${isCurrent ? 'border-yellow-400 border-4' : isTarget ? 'border-amber-300 border-4' : 'border-white border-2'}`}></div>
 
                                 <img
                                     src={location.image}
                                     alt={location.name}
-                                    className={`${isMobile ? 'h-16 w-16 md:h-24 md:w-24' : 'h-24 w-24 md:h-40 md:w-40'} rounded-full`}
+                                    className={`${isMobile ? 'h-14 w-14 md:h-22 md:w-22' : 'h-22 w-22 md:h-36 md:w-36'} rounded-full z-10`}
                                 />
-                            </div>
+                            </motion.div>
 
                             <div className="mt-1 bg-black px-2 py-1 rounded text-sm text-center shadow-md">
                                 {location.name}
                             </div>
-
                         </div>
                     );
                 })}

@@ -5,6 +5,85 @@ function gameReducer(state, action) {
   console.log("State before:", state);
 
   switch (action.type) {
+    case "UPGRADE_APARTMENT":
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          cash: state.player.cash - action.payload.upgradeFee,
+          rental: {
+            ...state.player.rental,
+            lastPaidWeek: state.player.week, // Reset payment clock
+            rentAmount: action.payload.rentAmount,
+            rentDue: false, // Reset rent due status
+          },
+        },
+        message: `You upgraded your apartment! New rent is $${action.payload.rentAmount} per month.`,
+      };
+
+    case "RENT_APARTMENT":
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          cash: state.player.cash - action.payload.deposit,
+          rental: {
+            ...state.player.rental,
+            hasApartment: true,
+            lastPaidWeek: state.player.week,
+            rentAmount: action.payload.rentAmount,
+          },
+        },
+        message: `You rented an apartment for $${action.payload.rentAmount} per month with a $${action.payload.deposit} deposit.`,
+      };
+
+    case "PAY_RENT":
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          cash: state.player.cash - state.player.rental.rentAmount,
+          rental: {
+            ...state.player.rental,
+            lastPaidWeek: state.player.week,
+            rentDue: false,
+            missedPayments: 0,
+          },
+        },
+        message: `You paid your rent of $${state.player.rental.rentAmount}.`,
+      };
+
+    case "CHECK_RENT_DUE":
+      // Check if rent needs to be paid (every 4 weeks)
+      const weeksSinceLastPayment = state.player.rental.lastPaidWeek
+        ? state.player.week - state.player.rental.lastPaidWeek
+        : 0;
+
+      // If player has an apartment and hasn't paid in 4 or more weeks
+      if (state.player.rental.hasApartment && weeksSinceLastPayment >= 4) {
+        return {
+          ...state,
+          player: {
+            ...state.player,
+            rental: {
+              ...state.player.rental,
+              rentDue: true,
+              missedPayments: state.player.rental.missedPayments + 1,
+            },
+            // Decrease happiness if rent is late
+            happiness: Math.max(state.player.happiness - 15, 0),
+          },
+          message: "Your rent is due! Visit the Rental Office to pay.",
+        };
+      }
+      return state;
+
+    case "HYDRATE_STATE":
+      // Replace the entire state with the saved state
+      return {
+        ...action.payload,
+      };
+
     case "SAVE_GAME":
       const saveSuccess = saveGame(state);
       return {
@@ -210,6 +289,24 @@ function gameReducer(state, action) {
               : state.player.happiness,
         };
 
+        // Define message variable
+        let message = "";
+
+        // Check if rent is due
+        if (updatedPlayer.rental && updatedPlayer.rental.hasApartment) {
+          const weeksSinceLastPayment = updatedPlayer.rental.lastPaidWeek
+            ? updatedPlayer.week - updatedPlayer.rental.lastPaidWeek
+            : 0;
+
+          // If 4 weeks have passed since last payment
+          if (weeksSinceLastPayment >= 4) {
+            updatedPlayer.rental.rentDue = true;
+            updatedPlayer.rental.missedPayments += 1;
+            updatedPlayer.happiness = Math.max(updatedPlayer.happiness - 10, 0);
+            message = `Week ${updatedPlayer.week} has begun! Your rent is due.`;
+          }
+        }
+
         // Update the players array with the current player's updated info
         const updatedPlayers = state.players.map((p) =>
           p.id === state.currentPlayerId ? updatedPlayer : p
@@ -222,17 +319,17 @@ function gameReducer(state, action) {
             state.currentPlayerId === state.totalPlayers
               ? 1
               : state.currentPlayerId + 1;
-
           // Find the next player from the players array
           const nextPlayer = updatedPlayers.find((p) => p.id === nextPlayerId);
-
           return {
             ...state,
             players: updatedPlayers,
             currentPlayerId: nextPlayerId,
             player: nextPlayer, // Switch to next player
             currentScreen: "map",
-            message: `Player ${nextPlayerId}'s turn! Week ${nextPlayer.week} continues.`,
+            message:
+              message ||
+              `Player ${nextPlayerId}'s turn! Week ${nextPlayer.week} continues.`,
           };
         } else {
           // Single player mode - continue with same player, new week
@@ -241,7 +338,9 @@ function gameReducer(state, action) {
             players: updatedPlayers,
             player: updatedPlayer,
             currentScreen: "map",
-            message: `Week ${updatedPlayer.week} has begun! You have a fresh 100 time units.`,
+            message:
+              message ||
+              `Week ${updatedPlayer.week} has begun! You have a fresh 100 time units.`,
           };
         }
       }
@@ -296,15 +395,31 @@ function gameReducer(state, action) {
       };
 
     case "WORK":
+      let salary = state.player.job.salary;
+      let garnishMessage = "";
+
+      // Check if rent is overdue and apply garnishment
+      if (state.player.rental.hasApartment && state.player.rental.rentDue) {
+        // Calculate garnishment amount (e.g., 20% of salary)
+        const garnishRate = 0.2;
+        const garnishAmount = Math.floor(salary * garnishRate);
+
+        // Reduce salary by garnishment amount
+        salary -= garnishAmount;
+
+        // Create garnishment message
+        garnishMessage = `\nWages garnished: $${garnishAmount} due to overdue rent.`;
+      }
+
       return {
         ...state,
         player: {
           ...state.player,
-          cash: state.player.cash + state.player.job.salary,
+          cash: state.player.cash + salary,
           energy: state.player.energy - 15,
           experience: Math.min(state.player.experience + 2, 100),
         },
-        message: `You worked and earned $${state.player.job.salary}!`,
+        message: `You worked and earned $${salary}!${garnishMessage}`,
       };
 
     case "GET_JOB":
@@ -366,11 +481,50 @@ function gameReducer(state, action) {
       const hasWinningJob =
         player.job && goals.winningJobs.includes(player.job.title);
 
+      // Check if player has a luxury apartment
+      const hasLuxuryApartment =
+        player.rental &&
+        player.rental.hasApartment &&
+        player.rental.rentAmount === 200;
+
+      // Modified winning condition: must have BOTH career path AND luxury apartment
       const achieved =
         player.cash >= goals.cash &&
         player.education >= goals.education &&
         player.happiness >= goals.happiness &&
-        hasWinningJob;
+        hasWinningJob &&
+        hasLuxuryApartment;
+
+      // Create detailed progress message
+      const progressDetails = {
+        cash: {
+          current: player.cash,
+          target: goals.cash,
+          achieved: player.cash >= goals.cash,
+        },
+        education: {
+          current: player.education,
+          target: goals.education,
+          achieved: player.education >= goals.education,
+        },
+        happiness: {
+          current: player.happiness,
+          target: goals.happiness,
+          achieved: player.happiness >= goals.happiness,
+        },
+        job: {
+          current: player.job?.title || "None",
+          target: goals.winningJobs,
+          achieved: hasWinningJob,
+        },
+        luxury: {
+          current:
+            player.rental?.rentAmount === 200
+              ? "Luxury Apartment"
+              : "Not Luxury",
+          achieved: hasLuxuryApartment,
+        },
+      };
 
       console.log("Checking goals:", {
         achieved,
@@ -380,6 +534,7 @@ function gameReducer(state, action) {
         job: `${
           player.job ? player.job.title : "None"
         }/${goals.winningJobs.join(" or ")}`,
+        luxury: hasLuxuryApartment ? "Yes" : "No",
       });
 
       if (achieved) {
@@ -388,13 +543,16 @@ function gameReducer(state, action) {
           gameWon: true,
           gameRunning: false,
           currentScreen: "gameOver",
-          message: "🎉 Congratulations! You've won the game! 🎉",
+          message:
+            "🎉 Congratulations! You've won the game by achieving BOTH career success AND luxury living! 🎉",
         };
       }
 
+      // Return progress details in the state temporarily
       return {
         ...state,
-        message: "Keep working toward your goals!",
+        message: "Here's your progress toward victory!",
+        currentScreen: "goals", // Switch to a goals screen
       };
 
     case "RESTART_GAME":

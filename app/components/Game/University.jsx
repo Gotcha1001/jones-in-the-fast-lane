@@ -83,15 +83,17 @@ export default function University() {
                 {/* Professor Image */}
                 <div className="flex mb-4">
                     <div className="flex-shrink-0 mr-4">
-                        <img
-                            src="/professor.jpg"
-                            alt="Professor"
-                            className="w-32 h-32 rounded-full border-2 border-blue-500 shadow-lg"
-                            onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = "https://img.freepik.com/free-photo/smiling-teacher-with-chalk-standing-near-blackboard_23-2148201043.jpg";
-                            }}
-                        />
+                        <div className="w-32 h-32 rounded-full border-2 border-blue-500 shadow-lg overflow-hidden flex items-center justify-center">
+                            <img
+                                src="/professor.jpg"
+                                alt="Professor"
+                                className="w-full h-full object-cover object-[center_top]"
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = "https://img.freepik.com/free-photo/smiling-teacher-with-chalk-standing-near-blackboard_23-2148201043.jpg";
+                                }}
+                            />
+                        </div>
                     </div>
                     <div className="bg-gradient-to-r from-blue-500 via-purple-900 to-black p-3 rounded-lg shadow-md">
                         <p className="text-sm italic text-gray-300">

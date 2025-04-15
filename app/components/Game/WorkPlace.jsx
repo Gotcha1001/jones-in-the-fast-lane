@@ -2,6 +2,7 @@ import { useGame } from '@/app/context/GameContext';
 import { useState, useEffect } from 'react';
 import { jobs } from '@/data/jobs'; // Import jobs data
 import { initAudio, loadWorkMusic, playWorkMusic, stopWorkMusic } from '@/data/audioManager';
+import { toast } from 'sonner';
 
 export default function Workplace() {
     const { state, dispatch } = useGame();
@@ -21,6 +22,20 @@ export default function Workplace() {
         };
     }, []);
 
+
+    // Helper function to handle both message and toast
+    const showMessage = (message) => {
+        // Set message in game state
+        dispatch({
+            type: 'SET_MESSAGE',
+            payload: { text: message }
+        });
+        // Show toast notification
+        toast.success(message);
+    };
+
+
+
     // Function to calculate experience progress percentage
     const getExperienceProgress = () => {
         return Math.min((player.experience / 100) * 100, 100);
@@ -29,13 +44,11 @@ export default function Workplace() {
     // Function to handle working
     const handleWork = () => {
         if (player.energy < 15) {
-            dispatch({
-                type: 'SET_MESSAGE',
-                payload: { text: "You're too tired to work!" }
-            });
+            showMessage("You're too tired to work!");
         } else {
             dispatch({ type: 'WORK' });
             dispatch({ type: 'USE_TIME', payload: { amount: 15 } });
+            showMessage("You completed your work shift and earned money!");
         }
     };
 
@@ -55,6 +68,21 @@ export default function Workplace() {
             type: 'CHANGE_SCREEN',
             payload: { screen: 'location' }
         });
+    };
+
+    const renderRentWarning = () => {
+        if (player.rental && player.rental.hasApartment && player.rental.rentDue) {
+            return (
+                <div className="bg-red-900 border-red-700 border p-3 rounded-lg shadow-md mb-4">
+                    <p className="text-red-300 font-bold">⚠️ Rent Overdue Warning</p>
+                    <p className="text-sm text-red-200">
+                        Your rent is overdue! 20% of your salary will be garnished until paid.
+                        Visit the Rental Office to pay your rent.
+                    </p>
+                </div>
+            );
+        }
+        return null;
     };
 
     // If player doesn't have a job, show a message
@@ -120,6 +148,8 @@ export default function Workplace() {
                         </p>
                     </div>
                 </div>
+
+                {renderRentWarning()}
 
                 {/* Job Information */}
                 <div className=" p-4 rounded mb-4">

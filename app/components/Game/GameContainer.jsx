@@ -21,6 +21,8 @@ import SaveLoadMenu from './SaveLoadMenu';
 import Workplace from './WorkPlace';
 import University from './University';
 import Apartment from './Apartment';
+import RentalOffice from './RentalOffice';
+import GoalsTracker from './GoalsTracker';
 
 export default function GameContainer() {
     const { state, dispatch } = useGame();
@@ -73,10 +75,14 @@ export default function GameContainer() {
                 return <University />;
             case 'apartment':
                 return <Apartment />;
+            case 'rentoffice':
+                return <RentalOffice />;
             case 'shares':
                 return <SharesMarket />;
             case 'leisure':  // Add this new case
                 return <LeisureCentre />;
+            case 'goals':  // Add this new case
+                return <GoalsTracker />;
             case 'saveload':
                 return <SaveLoadMenu />;
             default:

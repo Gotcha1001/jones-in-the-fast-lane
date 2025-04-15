@@ -72,9 +72,27 @@
 
 import { motion } from 'framer-motion';
 import GameContainer from "../components/Game/GameContainer";
+import GameProvider from "../context/GameProvider";
 import MotionWrapperDelay from '../components/FramerMotion/MotionWrapperDelay';
 
 export default function JonesGame() {
+
+
+
+
+    // Add this function at the top of your JonesGame component
+    const handleReturnHome = () => {
+        // Clear the autosave from localStorage
+        localStorage.removeItem('jonesGameAutoSave');
+        // Also clear any saved games
+        localStorage.removeItem('jonesInTheFactLane_saveGame');
+        sessionStorage.removeItem('jonesInTheFactLane_hasFileHandle');
+
+        // Now navigate to home
+        window.location.href = '/';
+    };
+
+
     return (
         <div className="text-white min-h-screen bg-gradient-to-b from-black via-indigo-950 to-teal-500">
             <motion.header
@@ -93,7 +111,8 @@ export default function JonesGame() {
                     </motion.h1>
                     <nav>
                         <motion.a
-                            href="/"
+                            href="#"
+                            onClick={handleReturnHome}
                             className="hover:text-blue-400"
                             whileHover={{ scale: 1.1 }}
                         >
@@ -104,7 +123,10 @@ export default function JonesGame() {
             </motion.header>
 
             <main className="container mx-auto px-4 py-8 bg-black">
-                <GameContainer />
+                <GameProvider>
+                    <GameContainer />
+                </GameProvider>
+
                 <motion.div
                     className="mt-4 mb-8 w-full flex justify-center"
                     initial={{ opacity: 0 }}

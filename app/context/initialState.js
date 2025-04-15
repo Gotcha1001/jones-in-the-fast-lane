@@ -6,6 +6,13 @@ const initialState = {
     name: "Jones",
     avatar: "👤",
     cash: 200,
+    rental: {
+      hasApartment: false,
+      lastPaidWeek: null,
+      rentAmount: 50,
+      rentDue: false,
+      missedPayments: 0,
+    },
     bankAccount: {
       savings: 0,
       lastInterestDate: null,
@@ -31,9 +38,9 @@ const initialState = {
   currentScreen: "map", // "map", "location", "job", "shop"
   message: null,
   goals: {
-    cash: 5000,
+    cash: 10000,
     education: 80,
-    happiness: 80,
+    happiness: 90,
     winningJobs: ["Executive", "Engineer", "Startup Founder", "Investor"],
   },
 };

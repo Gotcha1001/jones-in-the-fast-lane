@@ -5,17 +5,105 @@ import { useGame } from '@/app/context/GameContext';
 
 import { locations } from '@/data/locations';
 import { toast } from 'sonner';
+import { Button } from '../ui/button';
 
 export default function LocationDetail({ locationId }) {
     const { state, dispatch } = useGame();
     const { player } = state;
     const location = locations[locationId];
 
+
+
+    // Helper function to handle both message and toast
+    const showMessage = (message, actionType = null) => {
+        // Set message in game state
+        dispatch({
+            type: 'SET_MESSAGE',
+            payload: { text: message }
+        });
+
+        // Show toast notification
+        toast.success(message);
+
+        // If there's an action type, dispatch it too
+        if (actionType) {
+            dispatch({ type: actionType });
+        }
+    };
+
     const handleAction = (action) => {
 
         console.log("Action triggered:", action, "Current player state:", player);
 
         switch (action) {
+
+            case 'payRent':
+                if (!player.rental.hasApartment) {
+                    dispatch({
+                        type: 'SET_MESSAGE',
+                        payload: { text: "You don't have an apartment to pay rent for." }
+                    });
+                    return;
+                }
+
+                if (player.cash < player.rental.rentAmount) {
+                    dispatch({
+                        type: 'SET_MESSAGE',
+                        payload: { text: `You don't have enough cash to pay the rent of $${player.rental.rentAmount}.` }
+                    });
+                    return;
+                }
+
+                dispatch({ type: 'PAY_RENT' });
+                dispatch({ type: 'USE_TIME', payload: { amount: 5 } });
+                break;
+
+            case 'rentApartment':
+                if (player.rental.hasApartment) {
+                    dispatch({
+                        type: 'SET_MESSAGE',
+                        payload: { text: "You already have an apartment." }
+                    });
+                    return;
+                }
+
+                // Redirect to rental office
+                dispatch({
+                    type: 'CHANGE_SCREEN',
+                    payload: { screen: 'rentoffice' }
+                });
+                break;
+
+            case 'checkRentStatus':
+                const weeksSinceLastPayment = player.rental.lastPaidWeek
+                    ? player.week - player.rental.lastPaidWeek
+                    : 0;
+
+                if (!player.rental.hasApartment) {
+                    dispatch({
+                        type: 'SET_MESSAGE',
+                        payload: { text: "You don't have an apartment yet." }
+                    });
+                } else if (player.rental.rentDue) {
+                    dispatch({
+                        type: 'SET_MESSAGE',
+                        payload: { text: `Your rent of $${player.rental.rentAmount} is due! You're ${weeksSinceLastPayment - 4} weeks late.` }
+                    });
+                } else {
+                    dispatch({
+                        type: 'SET_MESSAGE',
+                        payload: { text: `Your rent is $${player.rental.rentAmount} per month. Next payment due in ${4 - weeksSinceLastPayment} weeks.` }
+                    });
+                }
+                break;
+
+            // Make sure you add the rentoffice entry
+            case 'rentoffice':
+                dispatch({
+                    type: 'CHANGE_SCREEN',
+                    payload: { screen: 'rentoffice' }
+                });
+                break;
 
 
             case 'leisure':
@@ -37,34 +125,21 @@ export default function LocationDetail({ locationId }) {
                 }
                 break;
 
-            // case 'study':
-            //     if (player.energy < 10) {
-            //         dispatch({
-            //             type: 'SET_MESSAGE',
-            //             payload: { text: "You're too tired to study!" }
-            //         });
-            //     } else if (player.education >= 100) {
-            //         dispatch({
-            //             type: 'SET_MESSAGE',
-            //             payload: { text: "You've reached maximum education!" }
-            //         });
-            //     } else {
-            //         dispatch({ type: 'STUDY' });
-            //         dispatch({ type: 'USE_TIME', payload: { amount: 15 } });
-            //         console.log("Dispatched USE_TIME with amount:", 15);
-            //     }
-            //     break;
-
-            // In your handleAction function in LocationDetail.jsx, you might want to update the study case:
-
-
-            // In LocationDetail.jsx, add to the handleAction function:
             case 'apartment':
+                if (!player?.rental?.hasApartment) {
+                    dispatch({
+                        type: 'SET_MESSAGE',
+                        payload: { text: "You need to rent an apartment first! Visit the Rental Office." }
+                    });
+                    toast.error("You need to rent an apartment first!");
+                    return;
+                }
                 dispatch({
                     type: 'CHANGE_SCREEN',
                     payload: { screen: 'apartment' }
                 });
                 break;
+
 
             case 'study':
                 if (player.location === 'university') {
@@ -149,7 +224,10 @@ export default function LocationDetail({ locationId }) {
                 break;
 
             case 'checkGoals':
-                dispatch({ type: 'CHECK_GOALS' });
+                dispatch({
+                    type: 'CHANGE_SCREEN',
+                    payload: { screen: 'goals' }
+                });
                 break;
 
             case 'checkBalance':
@@ -218,12 +296,13 @@ export default function LocationDetail({ locationId }) {
         <div className="location-detail mt-4">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">{location.name}</h2>
-                <button
+                <Button
+                    variant="sex2"
                     onClick={goBackToMap}
-                    className="bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded"
+                    className="bg-indigo-500 hover:bg-purple-600 text-white py-1 px-3 rounded"
                 >
                     Back to Map
-                </button>
+                </Button>
             </div>
 
             <div className="flex flex-col md:flex-row gap-4">
@@ -231,9 +310,9 @@ export default function LocationDetail({ locationId }) {
                     <img
                         src={location.image}
                         alt={location.name}
-                        className="w-full md:w-80 h-60 object-cover rounded-lg"
+                        className="w-full md:w-80 h-72 object-cover rounded-lg"
                     />
-                    <p className="mt-2 text-gray-300 text-sm">{location.description}</p>
+                    <p className="mt-2 text-gray-300 text-lg font-bold text-center">{location.description}</p>
                 </div>
 
                 <div className="flex-grow">
@@ -276,6 +355,12 @@ export default function LocationDetail({ locationId }) {
                                     actionName = 'Enter Apartment';
                                     actionDesc = 'Visit your home to rest and organize';
                                     break;
+
+                                case 'rentoffice':
+                                    actionName = 'Enter Rent Office';
+                                    actionDesc = 'Visit Your Rent Office';
+                                    break;
+
 
 
 
