@@ -251,7 +251,7 @@ export default function Apartment() {
                     <img
                         src={getApartmentImage()}
                         alt="Apartment Interior"
-                        className="w-full h-[400px] object-cover rounded-lg p-1 border-2 border-indigo-500"
+                        className="w-full h-96 object-cover rounded-lg p-1 border-2 border-indigo-500"
                         onError={(e) => {
                             e.target.onerror = null;
                             e.target.src = "https://img.freepik.com/free-photo/3d-rendering-loft-luxury-living-room-with-bookshelf-near-bookshelf_105762-2095.jpg";
@@ -393,10 +393,13 @@ export default function Apartment() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="mt-2 rounded-lg overflow-hidden">
-                        <img
-                            src="/gaming.jpg"
-                            alt="Playing Video Games"
-                            className="w-full h-[300px] object-cover"
+                        <video
+                            src="/gaming.mp4" // 👈 Make sure the file is in your `public` folder
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="w-full h-[300px] object-cover rounded-lg"
                         />
                     </div>
                     <div className="mt-4 text-center">
