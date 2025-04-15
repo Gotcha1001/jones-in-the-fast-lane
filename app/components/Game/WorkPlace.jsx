@@ -42,13 +42,14 @@ export default function Workplace() {
     };
 
     // Function to handle working
+    // Function to handle working
     const handleWork = () => {
         if (player.energy < 15) {
-            showMessage("You're too tired to work!");
+            showMessage("You're too tired to work!"); // Use showMessage consistently here
         } else {
             dispatch({ type: 'WORK' });
             dispatch({ type: 'USE_TIME', payload: { amount: 15 } });
-            showMessage("You completed your work shift and earned money!");
+            showMessage(`You completed your work shift and earned money! ${player.job.salary}`);
         }
     };
 

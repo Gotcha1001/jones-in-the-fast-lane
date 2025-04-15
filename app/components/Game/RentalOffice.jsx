@@ -277,28 +277,34 @@ export default function RentalOffice() {
     const [showRentModal, setShowRentModal] = useState(false);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
+
+
+    const showMessage = (message) => {
+        // Set message in game state
+        dispatch({
+            type: 'SET_MESSAGE',
+            payload: { text: message }
+        });
+        // Show toast notification
+        toast.success(message);
+    };
+
     const handleAction = (action) => {
         switch (action) {
             case 'payRent':
                 if (!player?.rental?.hasApartment) {
-                    dispatch({
-                        type: 'SET_MESSAGE',
-                        payload: { text: "You don't have an apartment to pay rent for." }
-                    });
+                    showMessage("You don't have an apartment to pay rent for.");
                     return;
                 }
 
                 if (player.cash < player.rental.rentAmount) {
-                    dispatch({
-                        type: 'SET_MESSAGE',
-                        payload: { text: `You don't have enough cash to pay the rent of $${player.rental.rentAmount}.` }
-                    });
+                    showMessage(`You don't have enough cash to pay the rent of $${player.rental.rentAmount}.`);
                     return;
                 }
 
                 dispatch({ type: 'PAY_RENT' });
                 dispatch({ type: 'USE_TIME', payload: { amount: 5 } });
-                toast.success("Rent payment successful!");
+                showMessage("Rent payment successful!");
                 break;
 
             case 'rentApartment':
@@ -317,20 +323,11 @@ export default function RentalOffice() {
                     : 0;
 
                 if (!player.rental.hasApartment) {
-                    dispatch({
-                        type: 'SET_MESSAGE',
-                        payload: { text: "You don't have an apartment yet." }
-                    });
+                    showMessage("You don't have an apartment yet.");
                 } else if (player.rental.rentDue) {
-                    dispatch({
-                        type: 'SET_MESSAGE',
-                        payload: { text: `Your rent of $${player.rental.rentAmount} is due! You're ${weeksSinceLastPayment - 4} weeks late.` }
-                    });
+                    showMessage(`Your rent of $${player.rental.rentAmount} is due! You're ${weeksSinceLastPayment - 4} weeks late.`);
                 } else {
-                    dispatch({
-                        type: 'SET_MESSAGE',
-                        payload: { text: `Your rent is $${player.rental.rentAmount} per month. Next payment due in ${4 - weeksSinceLastPayment} weeks.` }
-                    });
+                    showMessage(`Your rent is $${player.rental.rentAmount} per month. Next payment due in ${4 - weeksSinceLastPayment} weeks.`);
                 }
                 break;
 
@@ -338,6 +335,7 @@ export default function RentalOffice() {
                 break;
         }
     };
+
 
     const rentApartment = (tier) => {
         let rentAmount, deposit;
@@ -362,10 +360,7 @@ export default function RentalOffice() {
         }
 
         if (player.cash < deposit) {
-            dispatch({
-                type: 'SET_MESSAGE',
-                payload: { text: `You need $${deposit} for the deposit.` }
-            });
+            showMessage(`You need $${deposit} for the deposit.`);
             return;
         }
 
@@ -375,7 +370,7 @@ export default function RentalOffice() {
         });
         dispatch({ type: 'USE_TIME', payload: { amount: 15 } });
         setShowRentModal(false);
-        toast.success("You've successfully rented an apartment!");
+        showMessage("You've successfully rented an apartment!");
     };
 
     const upgradeApartment = (tier) => {
@@ -387,10 +382,7 @@ export default function RentalOffice() {
         // If trying to upgrade to the same tier or lower
         if ((currentTier === 'standard' && tier === 'basic') ||
             (currentTier === 'luxury' && (tier === 'basic' || tier === 'standard'))) {
-            dispatch({
-                type: 'SET_MESSAGE',
-                payload: { text: "You can't downgrade your apartment. Consider renting a new one instead." }
-            });
+            showMessage("You can't downgrade your apartment. Consider renting a new one instead.");
             setShowUpgradeModal(false);
             return;
         }
@@ -411,10 +403,7 @@ export default function RentalOffice() {
         }
 
         if (player.cash < upgradeFee) {
-            dispatch({
-                type: 'SET_MESSAGE',
-                payload: { text: `You need $${upgradeFee} for the upgrade fee.` }
-            });
+            showMessage(`You need $${upgradeFee} for the upgrade fee.`);
             return;
         }
 
@@ -424,7 +413,7 @@ export default function RentalOffice() {
         });
         dispatch({ type: 'USE_TIME', payload: { amount: 15 } });
         setShowUpgradeModal(false);
-        toast.success(`You've successfully upgraded to a ${tier} apartment!`);
+        showMessage(`You've successfully upgraded to a ${tier} apartment!`);
     };
 
     const getApartmentTier = () => {

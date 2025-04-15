@@ -4,6 +4,7 @@ import { initAudio, loadLeisureMusic, playLeisureMusic, stopLeisureMusic } from 
 import { useState, useEffect } from 'react';
 import FeatureMotionWrapper from '../FramerMotion/FeatureMotionWrapperMap';
 import MotionWrapperDelay from '../FramerMotion/MotionWrapperDelay';
+import { toast } from 'sonner';
 
 export default function LeisureCentre() {
     const { state, dispatch } = useGame();
@@ -20,6 +21,24 @@ export default function LeisureCentre() {
             stopLeisureMusic();
         };
     }, []);
+
+
+    const showMessage = (message, type = 'success') => {
+        // Set message in game state
+        dispatch({
+            type: 'SET_MESSAGE',
+            payload: { text: message }
+        });
+
+        // Show toast notification
+        if (type === 'success') {
+            toast.success(message);
+        } else if (type === 'error') {
+            toast.error(message);
+        } else {
+            toast(message);
+        }
+    };
 
     // Activities with their costs, time requirements, and benefits
     const activities = {
@@ -77,6 +96,7 @@ export default function LeisureCentre() {
                 type: 'SET_MESSAGE',
                 payload: { text: `You don't have enough cash for ${activity.name}.` }
             });
+            showMessage(`You don't have enough cash for ${activity.name}.`, 'error');
             return;
         }
 
@@ -84,7 +104,9 @@ export default function LeisureCentre() {
             dispatch({
                 type: 'SET_MESSAGE',
                 payload: { text: `You're too tired for ${activity.name}.` }
+
             });
+            showMessage(`You're too tired for ${activity.name}.`, 'error');
             return;
         }
 
@@ -102,6 +124,8 @@ export default function LeisureCentre() {
             type: 'USE_TIME',
             payload: { amount: activity.time }
         });
+
+        showMessage(`You enjoyed ${activity.name} and gained ${activity.happiness} happiness!`);
 
         dispatch({
             type: 'SET_MESSAGE',

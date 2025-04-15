@@ -5,6 +5,7 @@ import { initAudio, loadMallMusic, playMallMusic, stopMallMusic } from "@/data/a
 import { shopItems } from "@/data/items";
 import { useEffect } from "react";
 import FeatureMotionWrapper from "../FramerMotion/FeatureMotionWrapperMap";
+import { toast } from 'sonner'; // Add this import
 
 
 export default function ShoppingMall() {
@@ -26,6 +27,17 @@ export default function ShoppingMall() {
         };
     }, []);
 
+    // Helper function to handle both message and toast
+    const showMessage = (message) => {
+        // Set message in game state
+        dispatch({
+            type: 'SET_MESSAGE',
+            payload: { text: message }
+        });
+        // Show toast notification
+        toast.success(message);
+    };
+
 
     const goBackToLocation = () => {
         dispatch({ type: 'CHANGE_SCREEN', payload: { screen: 'location' } });
@@ -33,22 +45,17 @@ export default function ShoppingMall() {
 
     const buyItem = (item) => {
         if (player.cash < item.price) {
-            dispatch({
-                type: 'SET_MESSAGE',
-                payload: { text: `You don't have enough money to buy ${item.name}.` }
-            });
+            showMessage(`You don't have enough money to buy ${item.name}.`);
             return;
         }
 
         if (player.possessions.includes(item.name)) {
-            dispatch({
-                type: 'SET_MESSAGE',
-                payload: { text: `You already own a ${item.name}.` }
-            });
+            showMessage(`You already own a ${item.name}.`);
             return;
         }
 
         dispatch({ type: 'BUY_ITEM', payload: { item } });
+        showMessage(`You bought a ${item.name}!`);
     };
 
     return (

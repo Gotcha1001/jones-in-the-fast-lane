@@ -1,6 +1,7 @@
 import { useGame } from '@/app/context/GameContext';
 import { initAudio, loadUniversityMusic, playUniversityMusic, stopUniversityMusic } from '@/data/audioManager';
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner'; // Add this import
 
 export default function University() {
     const { state, dispatch } = useGame();
@@ -21,6 +22,18 @@ export default function University() {
         };
     }, []);
 
+
+    // Helper function to handle both message and toast
+    const showMessage = (message) => {
+        // Set message in game state
+        dispatch({
+            type: 'SET_MESSAGE',
+            payload: { text: message }
+        });
+        // Show toast notification
+        toast.success(message);
+    };
+
     // Create a visual representation of education level
     const getEducationVisual = (education) => {
         const books = Math.min(Math.ceil(education / 10), 10);
@@ -39,11 +52,9 @@ export default function University() {
                 payload: { hours: studyHours }
             });
             dispatch({ type: 'USE_TIME', payload: { amount: studyHours } });
+            showMessage(`You studied for ${studyHours} hours and improved your education!`);
         } else {
-            dispatch({
-                type: 'SET_MESSAGE',
-                payload: { text: "You're too tired to study. Get some rest first!" }
-            });
+            showMessage("You're too tired to study. Get some rest first!");
         }
     };
 

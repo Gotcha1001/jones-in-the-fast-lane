@@ -111,14 +111,26 @@ export default function Apartment() {
             dispatch({ type: 'USE_TIME', payload: { amount: 30 } });
             showMessage("You had a good rest and recovered energy!");
         } else {
+            dispatch({
+                type: 'SET_MESSAGE',
+                payload: { text: "You're already full of energy!" }
+            });
             showMessage("You're already full of energy!");
         }
     };
 
     const handleStudy = () => {
         if (player.energy < 10) {
+            dispatch({
+                type: 'SET_MESSAGE',
+                payload: { text: "You're too tired to study!" }
+            });
             showMessage("You're too tired to study!");
         } else if (player.education >= 100) {
+            dispatch({
+                type: 'SET_MESSAGE',
+                payload: { text: "You've reached maximum education!" }
+            });
             showMessage("You've reached maximum education!");
         } else {
             dispatch({ type: 'STUDY' });
@@ -130,6 +142,10 @@ export default function Apartment() {
     // Entertainment options
     const handleWatchTV = () => {
         if (player.energy < 5) {
+            dispatch({
+                type: 'SET_MESSAGE',
+                payload: { text: "You're too tired to watch TV!" }
+            });
             showMessage("You're too tired to watch TV!");
             return;
         }
@@ -150,6 +166,10 @@ export default function Apartment() {
 
     const handlePlayGames = () => {
         if (player.energy < 8) {
+            dispatch({
+                type: 'SET_MESSAGE',
+                payload: { text: "You're too tired to play video games!" }
+            });
             showMessage("You're too tired to play video games!");
             return;
         }
@@ -170,6 +190,10 @@ export default function Apartment() {
 
     const handleMeditate = () => {
         if (player.energy < 3) {
+            dispatch({
+                type: 'SET_MESSAGE',
+                payload: { text: "You're too tired to meditate effectively!" }
+            });
             showMessage("You're too tired to meditate effectively!");
             return;
         }
