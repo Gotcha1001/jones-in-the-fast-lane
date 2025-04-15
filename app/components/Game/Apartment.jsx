@@ -366,10 +366,13 @@ export default function Apartment() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="mt-2 rounded-lg overflow-hidden">
-                        <img
-                            src="/tv.jpg"
-                            alt="Watching TV"
-                            className="w-full h-[300px] object-cover"
+                        <video
+                            src="/gaming.mp4" // 👈 Make sure the file is in your `public` folder
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="w-full h-[300px] object-cover rounded-lg"
                         />
                     </div>
                     <div className="mt-4 text-center">
