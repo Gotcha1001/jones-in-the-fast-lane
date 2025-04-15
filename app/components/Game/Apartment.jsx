@@ -73,7 +73,7 @@ export default function Apartment() {
             case 50:
                 return "/home.jpg"; // Basic apartment
             case 100:
-                return "/home1.jpg"; // Standard apartment
+                return "/home2.jpg"; // Standard apartment
             case 200:
                 return "/home3.jpg"; // Luxury apartment
             default:
@@ -366,13 +366,10 @@ export default function Apartment() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="mt-2 rounded-lg overflow-hidden">
-                        <video
-                            src="/gaming.mp4" // 👈 Make sure the file is in your `public` folder
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            className="w-full h-[300px] object-cover rounded-lg"
+                        <img
+                            src="/tv.jpg"
+                            alt="Watching TV"
+                            className="w-full h-[300px] object-cover"
                         />
                     </div>
                     <div className="mt-4 text-center">
@@ -396,13 +393,10 @@ export default function Apartment() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="mt-2 rounded-lg overflow-hidden">
-                        <video
-                            src="/gaming.mp4" // 👈 Make sure the file is in your `public` folder
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            className="w-full h-[300px] object-cover rounded-lg"
+                        <img
+                            src="/gaming.jpg"
+                            alt="Playing Video Games"
+                            className="w-full h-[300px] object-cover"
                         />
                     </div>
                     <div className="mt-4 text-center">
