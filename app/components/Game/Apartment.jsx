@@ -339,6 +339,45 @@ export default function Apartment() {
                     </div>
                 </div>
 
+
+
+                {/* Relationship Status */}
+                <div className="p-4 rounded mb-4">
+                    <h3 className="text-lg font-semibold mb-2">Relationship Status</h3>
+                    {player.relationship.isDating ? (
+                        <div className="bg-gray-700 p-3 rounded-lg">
+                            <div className="flex items-center mb-2">
+                                <div className="w-16 h-16 rounded-full overflow-hidden mr-3 border-2 border-pink-300">
+                                    <img
+                                        src={player.relationship.partner.image}
+                                        alt={player.relationship.partner.name}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = "/api/placeholder/100/100";
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <h4 className="font-medium text-white">Dating: {player.relationship.partner.name}</h4>
+                                    <div className="text-sm text-gray-300">
+                                        <div>Dates: {player.relationship.dateCount}</div>
+                                        <div>Relationship Happiness: {player.relationship.happiness}/100</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => dispatch({ type: 'BREAK_UP' })}
+                                className="mt-2 bg-red-600 hover:bg-red-500 text-white py-1 px-4 rounded text-sm"
+                            >
+                                Break Up
+                            </button>
+                        </div>
+                    ) : (
+                        <p className="text-gray-400 text-sm">You're currently single. Visit the Dating Office to find someone!</p>
+                    )}
+                </div>
+
                 {/* Possessions */}
                 <div className="p-4 rounded">
                     <h3 className="text-lg font-semibold mb-2">Your Possessions</h3>

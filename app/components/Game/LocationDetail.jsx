@@ -217,6 +217,15 @@ export default function LocationDetail({ locationId }) {
                 }
                 break;
 
+
+            // In your handleAction function, add a case for 'datingOffice':
+            case 'datingOffice':
+                dispatch({
+                    type: 'CHANGE_SCREEN',
+                    payload: { screen: 'datingOffice' }
+                });
+                break;
+
             case 'findJob':
                 dispatch({
                     type: 'CHANGE_SCREEN',
@@ -375,7 +384,10 @@ export default function LocationDetail({ locationId }) {
                                     break;
 
 
-
+                                case 'datingOffice':
+                                    actionName = 'Find a Date';
+                                    actionDesc = 'Meet someone special';
+                                    break;
 
                                 case 'relax':
                                     actionName = 'Relax';

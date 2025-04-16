@@ -63,6 +63,67 @@ function gameReducer(state, action) {
         message: `${event.title}: ${event.description}`,
       };
 
+    // Add these cases to your game reducer
+
+    case "START_RELATIONSHIP":
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          relationship: {
+            ...state.player.relationship,
+            isDating: true,
+            partner: action.payload.partner,
+            dateCount: 1,
+            happiness: 30, // Initial relationship happiness
+          },
+        },
+        message: `You've started dating ${action.payload.partner.name}!`,
+      };
+
+    case "GO_ON_DATE":
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          cash: state.player.cash - action.payload.cost,
+          happiness: Math.min(
+            state.player.happiness + action.payload.happinessBoost,
+            100
+          ),
+          relationship: {
+            ...state.player.relationship,
+            dateCount: state.player.relationship.dateCount + 1,
+            happiness: Math.min(state.player.relationship.happiness + 15, 100),
+            health: Math.min(
+              (state.player.relationship.health || 80) +
+                action.payload.healthBoost,
+              100
+            ),
+          },
+        },
+        message: `You had a wonderful date with ${action.payload.partner.name} and your relationship grew stronger!`,
+      };
+
+    case "BREAK_UP":
+      const partnerName =
+        state.player.relationship.partner?.name || "your partner";
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          happiness: Math.max(state.player.happiness - 15, 0), // Breaking up hurts
+          relationship: {
+            isDating: false,
+            partner: null,
+            dateCount: 0,
+            happiness: 0,
+            health: state.player.relationship.health || 80, // Keep the health stat
+          },
+        },
+        message: `You broke up with ${partnerName}. It's for the best, but it still hurts.`,
+      };
+
     case "UPGRADE_APARTMENT":
       return {
         ...state,

@@ -17,6 +17,13 @@ const initialState = {
       savings: 0,
       lastInterestDate: null,
     },
+    relationship: {
+      isDating: false,
+      partner: null,
+      dateCount: 0,
+      happiness: 0,
+      health: 80, // New stat for health/wellbeing
+    },
     shares: [], // Initialize empty shares array
     education: 0,
     experience: 0,

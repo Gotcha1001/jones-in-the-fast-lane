@@ -451,3 +451,51 @@ export const stopFastFoodMusic = () => {
     fastFoodMusicSource = null;
   }
 };
+
+// DATING OFFICE MUSIC
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+let datingOfficeMusic = null;
+let datingOfficeMusicSource = null;
+
+export const loadDatingOfficeMusic = async (url) => {
+  if (!audioContext) {
+    if (!initAudio()) return;
+  }
+
+  try {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    datingOfficeMusic = audioBuffer;
+    return true;
+  } catch (error) {
+    console.error("Error loading dating office music:", error);
+    return false;
+  }
+};
+
+export const playDatingOfficeMusic = () => {
+  if (!audioContext || !datingOfficeMusic) return;
+
+  // Stop previous music if playing
+  if (datingOfficeMusicSource) {
+    datingOfficeMusicSource.stop();
+  }
+
+  // Create new source
+  const musicSource = audioContext.createBufferSource();
+  musicSource.buffer = datingOfficeMusic;
+  musicSource.loop = true;
+  musicSource.connect(audioContext.destination);
+  musicSource.start();
+  datingOfficeMusicSource = musicSource;
+
+  return musicSource;
+};
+
+export const stopDatingOfficeMusic = () => {
+  if (datingOfficeMusicSource) {
+    datingOfficeMusicSource.stop();
+    datingOfficeMusicSource = null;
+  }
+};

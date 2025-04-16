@@ -13,7 +13,7 @@ export const locations = {
     description: "Your humble abode",
     image:
       "https://img.freepik.com/free-photo/3d-electric-car-building_23-2148972401.jpg",
-    mapX: 50, // % position on map
+    mapX: 45, // % position on map
     mapY: 14, // % position on map
     actions: ["sleep", "checkGoals", "apartment"], // Add "apartment" action
   },
@@ -67,7 +67,7 @@ export const locations = {
     image:
       "https://img.freepik.com/free-photo/view-3d-building-architecture-lawyer-s-day-celebration_23-2151023422.jpg",
     mapX: 88,
-    mapY: 90,
+    mapY: 88,
     actions: ["bank"],
   },
   fastFood: {
@@ -78,5 +78,14 @@ export const locations = {
     mapX: 15, // Updated position to fit better in your path
     mapY: 50, // Updated position to fit better in your path
     actions: ["fastFood"],
+  },
+  datingOffice: {
+    name: "Dating Office",
+    description: "Find your special someone",
+    image:
+      "https://img.freepik.com/free-photo/3d-heart-shape-city_23-2150965369.jpg?uid=R194451028&ga=GA1.1.1480099583.1741975489&semt=ais_hybrid&w=740",
+    mapX: 69,
+    mapY: 15,
+    actions: ["datingOffice"],
   },
 };
