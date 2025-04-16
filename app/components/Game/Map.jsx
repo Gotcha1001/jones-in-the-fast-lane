@@ -1,10 +1,11 @@
-
-
+// Map.jsx
 import { useGame } from '@/app/context/GameContext';
 import { initAudio, loadWalkingSound, playWalkingSound, stopWalkingSound } from '@/data/audioManager';
 import { locations } from '@/data/locations';
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import PathSystem from './PathSystem';
+
 
 export default function Map() {
     const { state, dispatch } = useGame();
@@ -15,7 +16,6 @@ export default function Map() {
     const [pathSegments, setPathSegments] = useState([]);
     const [overallProgress, setOverallProgress] = useState(0);
     const [isMobile, setIsMobile] = useState(false);
-
 
     useEffect(() => {
         initAudio();
@@ -28,72 +28,34 @@ export default function Map() {
         } else {
             stopWalkingSound();
         }
-    }, [isWalking])
-
+    }, [isWalking]);
 
     // Check if screen is mobile size
     useEffect(() => {
         const checkMobile = () => {
             setIsMobile(window.innerWidth < 768);
         };
-
         // Initial check
         checkMobile();
-
         // Add event listener
         window.addEventListener('resize', checkMobile);
-
         // Clean up
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Define location positions (percentage-based for responsive layout)
+    // Use the mapX and mapY directly from locations object
     const locationPositions = useMemo(() => {
         const positions = {};
-        const locationKeys = Object.keys(locations);
-
-        // Define your desired larger values
-        const margin = 15;  // Increased from 10
-        const squareSize = 100;  // Increased from 80
-
-        // Calculate the total size of the map area
-        const totalWidth = margin * 2 + squareSize;
-        const totalHeight = margin * 2 + squareSize;
-
-        locationKeys.forEach((id, index) => {
-            let x, y;
-
-            switch (index) {
-                case 0: x = margin + 5; y = margin + 5; break;
-                case 1: x = margin + squareSize - 5; y = margin + 5; break;
-                case 2: x = margin + squareSize - 5; y = margin + squareSize - 5; break;
-                case 3: x = margin + 5; y = margin + squareSize - 5; break;
-                case 4: x = margin + squareSize / 2; y = margin; break;
-                case 5: x = margin + squareSize; y = margin + squareSize / 2; break;
-                case 6: x = margin + squareSize / 2; y = margin + squareSize; break;
-                case 7: x = margin; y = margin + squareSize / 2; break;
-                default:
-                    const section = index % 4;
-                    const offset = Math.floor(index / 4) * 0.25;
-                    switch (section) {
-                        case 0: x = margin + 15 + offset * squareSize; y = margin + 15; break;
-                        case 1: x = margin + squareSize - 15; y = margin + 15 + offset * squareSize; break;
-                        case 2: x = margin + squareSize - 15 - offset * squareSize; y = margin + squareSize - 15; break;
-                        case 3: x = margin + 15; y = margin + squareSize - 15 - offset * squareSize; break;
-                    }
-            }
-
-            // Convert absolute coordinates to percentages
+        Object.entries(locations).forEach(([id, location]) => {
             positions[id] = {
-                x: (x / totalWidth) * 100,
-                y: (y / totalHeight) * 100
+                x: location.mapX,
+                y: location.mapY
             };
         });
-
         return positions;
     }, []);
 
-    // Define the complete path network connecting all locations
+    // Path network moved to PathSystem component
     const pathNetwork = useMemo(() => {
         // Define key path points (main circuit) - in percentages now
         const mainPath = [
@@ -115,6 +77,7 @@ export default function Map() {
         // Connect each location to the nearest path point
         locationKeys.forEach(id => {
             const pos = locationPositions[id];
+
             // Find the closest path point
             let closestPoint = null;
             let minDistance = Infinity;
@@ -203,73 +166,19 @@ export default function Map() {
         return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
     };
 
-    // Generate stone tiles along all paths
-    const generateStoneSegments = useMemo(() => {
-        const segments = [];
-        const locationKeys = Object.keys(locations);
-        const addedPoints = new Set(); // To avoid duplicates
-
-        // Add stones for every path in the network
-        locationKeys.forEach(fromId => {
-            Object.entries(pathNetwork[fromId].directConnections).forEach(([toId, path]) => {
-                for (let i = 0; i < path.length - 1; i++) {
-                    const start = path[i];
-                    const end = path[i + 1];
-                    const distance = Math.sqrt(
-                        Math.pow(end.x - start.x, 2) +
-                        Math.pow(end.y - start.y, 2)
-                    );
-
-                    // Determine number of stones based on distance
-                    const steps = Math.max(3, Math.floor(distance / 2));
-                    for (let step = 0; step <= steps; step++) {
-                        const progress = step / steps;
-                        const x = start.x + (end.x - start.x) * progress;
-                        const y = start.y + (end.y - start.y) * progress;
-
-                        // Create a unique identifier for this point
-                        const pointId = `${Math.round(x * 10)},${Math.round(y * 10)}`;
-
-                        // Only add if we haven't already
-                        if (!addedPoints.has(pointId)) {
-                            addedPoints.add(pointId);
-
-                            // Add some small randomness to make it look natural
-                            const jitterX = (Math.random() - 0.5) * 1.5;
-                            const jitterY = (Math.random() - 0.5) * 1.5;
-
-                            segments.push({
-                                x: x + jitterX,
-                                y: y + jitterY,
-                                size: 4 + Math.random() * 2, // Varied sizes
-                                rotation: Math.random() * 360, // Random rotation
-                                opacity: 0.7 + Math.random() * 0.3 // Varied opacity
-                            });
-                        }
-                    }
-                }
-            });
-        });
-
-        return segments;
-    }, [pathNetwork]);
-
     // Handle walking animation along the path
     useEffect(() => {
         if (isWalking && targetLocation) {
             // Get the path from current location to target
             const path = pathNetwork[player.location].directConnections[targetLocation];
             setPathSegments(path);
-
             const totalSegments = path.length - 1;
             const duration = 5000; // 5 seconds total animation time
-
             let startTime = null;
             let animationId = null;
 
             const animate = (timestamp) => {
                 if (!startTime) startTime = timestamp;
-
                 const elapsed = timestamp - startTime;
                 const rawProgress = Math.min(elapsed / duration, 1);
 
@@ -323,6 +232,7 @@ export default function Map() {
 
         setTargetLocation(locationId);
         dispatch({ type: 'MOVE_TO_LOCATION', payload: { locationId } });
+
         setTimeout(() => {
             dispatch({ type: 'COMPLETE_MOVE', payload: { locationId } });
             setTargetLocation(null);
@@ -336,7 +246,6 @@ export default function Map() {
     // Get the current animated position along the path
     const getAnimatedPosition = () => {
         if (!isWalking || !targetLocation || pathSegments.length === 0) return null;
-
         if (currentPathSegment >= pathSegments.length - 1) return pathSegments[pathSegments.length - 1];
 
         const start = pathSegments[currentPathSegment];
@@ -378,7 +287,6 @@ export default function Map() {
                     backgroundPosition: "center"
                 }}
             >
-
                 {/* Background path image */}
                 <img
                     src="/stone2.png"
@@ -394,29 +302,14 @@ export default function Map() {
                     }}
                 />
 
-
-                {/* Stone path */}
-                {generateStoneSegments.map((stone, index) => (
-                    <div
-                        key={`stone-${index}`}
-                        className="absolute"
-                        style={{
-                            left: `${stone.x}%`,
-                            top: `${stone.y}%`,
-                            width: `${stone.size}%`,
-                            height: `${stone.size}%`,
-                            transform: `translate(-50%, -50%) rotate(${stone.rotation}deg)`,
-                            opacity: stone.opacity,
-                            zIndex: 5
-                        }}
-                    >
-                        <img
-                            src="/stone.png"
-                            alt="Stone"
-                            className="w-full h-full object-contain"
-                        />
-                    </div>
-                ))}
+                {/* PathSystem component */}
+                <PathSystem
+                    locationPositions={locationPositions}
+                    player={player}
+                    isWalking={isWalking}
+                    targetLocation={targetLocation}
+                    isMobile={isMobile}
+                />
 
                 {/* Avatar walking animation - always visible */}
                 {isWalking && getAnimatedPosition() && (
@@ -462,7 +355,7 @@ export default function Map() {
                                 />
                             </div>
                         </div>
-                        <div className="mt-2 bg-black px-3 py-1 rounded text-sm text-center font-bold shadow-md">
+                        <div className="mt-2 bg-gradient-to-r from-indigo-500 via-purple-900 to-black px-3 py-1 rounded text-sm text-center font-bold shadow-md">
                             {player.name}
                         </div>
                     </div>
@@ -511,6 +404,7 @@ export default function Map() {
                     const pos = locationPositions[id];
                     const isCurrent = player.location === id;
                     const isTarget = targetLocation === id;
+
                     return (
                         <div
                             key={id}
@@ -524,7 +418,7 @@ export default function Map() {
                             onClick={() => isCurrent ? enterLocation(id) : walkToLocation(id)}
                         >
                             <motion.div
-                                className={`location-marker relative ${isCurrent ? 'bg-green-500' : isTarget ? 'bg-amber-500' : 'bg-indigo-500'} 
+                                className={`location-marker relative ${isCurrent ? 'bg-green-500' : isTarget ? 'bg-amber-500' : 'bg-indigo-500'}
                                 ${isMobile ? 'h-16 w-16 md:h-24 md:w-24' : 'h-24 w-24 md:h-40 md:w-40'} rounded-full flex items-center justify-center cursor-pointer shadow-lg`}
                                 whileHover={{
                                     scale: 1.1,
@@ -535,38 +429,19 @@ export default function Map() {
                                 }}
                             >
                                 <div className={`absolute inset-0 rounded-full ${isCurrent ? 'border-yellow-400 border-4' : isTarget ? 'border-amber-300 border-4' : 'border-white border-2'}`}></div>
-
                                 <img
                                     src={location.image}
                                     alt={location.name}
                                     className={`${isMobile ? 'h-14 w-14 md:h-22 md:w-22' : 'h-22 w-22 md:h-36 md:w-36'} rounded-full z-10`}
                                 />
                             </motion.div>
-
                             <div className="mt-1 bg-black px-2 py-1 rounded text-sm text-center shadow-md">
                                 {location.name}
                             </div>
                         </div>
                     );
                 })}
-            </div>
-
-            {/* Location info */}
-            <div className="mt-4 bg-gray-900 rounded-lg p-4">
-                <div className="flex items-center">
-                    <img src={locations[player.location].image} alt={locations[player.location].name} className="h-24 w-24 object-cover rounded-lg mr-4 border-2 border-blue-400" />
-                    <div>
-                        <h4 className="text-lg font-bold">{locations[player.location].name}</h4>
-                        <p className="text-sm text-gray-300">{locations[player.location].description}</p>
-                    </div>
-                </div>
-                <div className="mt-2">
-                    <button onClick={() => enterLocation(player.location)} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
-                        Enter Location
-                    </button>
-                </div>
-            </div>
+            </div> {/* This closes map container */}
         </div>
     );
 }
-

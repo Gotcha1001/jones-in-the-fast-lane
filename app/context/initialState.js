@@ -37,6 +37,9 @@ const initialState = {
   viewingStats: false, // Add this line here
   currentScreen: "map", // "map", "location", "job", "shop"
   message: null,
+  // Add these new properties for random events
+  lastRandomEvent: null,
+  showRandomEvent: false,
   goals: {
     cash: 10000,
     education: 80,

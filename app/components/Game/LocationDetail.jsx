@@ -105,6 +105,14 @@ export default function LocationDetail({ locationId }) {
                 });
                 break;
 
+            // In your handleAction function, add a case for 'fastFood':
+            case 'fastFood':
+                dispatch({
+                    type: 'CHANGE_SCREEN',
+                    payload: { screen: 'fastFood' }
+                });
+                break;
+
 
             case 'leisure':
                 dispatch({
@@ -326,6 +334,11 @@ export default function LocationDetail({ locationId }) {
                                 case 'bank':
                                     actionName = 'Visit Bank';
                                     actionDesc = 'Manage your savings and view your finances';
+                                    break;
+
+                                case 'fastFood':
+                                    actionName = 'Order Food';
+                                    actionDesc = 'Grab something to eat';
                                     break;
 
                                 case 'sleep':

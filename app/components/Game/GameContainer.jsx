@@ -23,6 +23,8 @@ import University from './University';
 import Apartment from './Apartment';
 import RentalOffice from './RentalOffice';
 import GoalsTracker from './GoalsTracker';
+import RandomEventAlert from './RandomEventAlert';
+import FastFood from './FastFood';
 
 export default function GameContainer() {
     const { state, dispatch } = useGame();
@@ -81,6 +83,8 @@ export default function GameContainer() {
                 return <SharesMarket />;
             case 'leisure':  // Add this new case
                 return <LeisureCentre />;
+            case 'fastFood':
+                return <FastFood />;
             case 'goals':  // Add this new case
                 return <GoalsTracker />;
             case 'saveload':
@@ -97,6 +101,10 @@ export default function GameContainer() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
         >
+
+            {/* Add the RandomEventAlert component */}
+            <RandomEventAlert />
+
             {/* The WinNotification will show automatically when gameWon is true */}
             <WinNotification />
             {!state.isPlayerSelect && <Stats />}

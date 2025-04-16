@@ -402,3 +402,52 @@ export const stopHomeMusic = () => {
     homeMusicSource = null;
   }
 };
+
+// FAST FOOD MUSIC
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+let fastFoodMusic = null;
+let fastFoodMusicSource = null;
+
+export const loadFastFoodMusic = async (url) => {
+  if (!audioContext) {
+    if (!initAudio()) return;
+  }
+
+  try {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    fastFoodMusic = audioBuffer;
+    return true;
+  } catch (error) {
+    console.error("Error loading fast food music:", error);
+    return false;
+  }
+};
+
+export const playFastFoodMusic = () => {
+  if (!audioContext || !fastFoodMusic) return;
+
+  // Stop previous music if playing
+  if (fastFoodMusicSource) {
+    fastFoodMusicSource.stop();
+  }
+
+  // Create new source
+  const musicSource = audioContext.createBufferSource();
+  musicSource.buffer = fastFoodMusic;
+  musicSource.loop = true;
+  musicSource.connect(audioContext.destination);
+  musicSource.start();
+
+  fastFoodMusicSource = musicSource;
+  return musicSource;
+};
+
+export const stopFastFoodMusic = () => {
+  if (fastFoodMusicSource) {
+    fastFoodMusicSource.stop();
+    fastFoodMusicSource = null;
+  }
+};

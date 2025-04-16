@@ -4,6 +4,7 @@ import { useGame } from "@/app/context/GameContext";
 import { initAudio, loadEmploymentMusic, playEmploymentMusic, stopEmploymentMusic } from "@/data/audioManager";
 import { jobs } from "@/data/jobs";
 import { useEffect } from "react";
+import FeatureMotionWrapper from "../FramerMotion/FeatureMotionWrapperMap";
 
 
 
@@ -65,43 +66,67 @@ export default function JobOffice() {
 
             <div className="bg-gray-900 p-4 rounded-lg mb-4">
                 <h3 className="text-lg font-semibold mb-3">Available Jobs</h3>
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {jobs.map((job, index) => {
                         const canApply = player.education >= job.eduReq && player.experience >= job.expReq;
                         const isCurrentJob = player.job && player.job.title === job.title;
 
                         return (
-                            <div
-                                key={index}
-                                className={`border ${isCurrentJob ? 'border-green-500' : canApply ? 'border-blue-500' : 'border-gray-700'} rounded-lg p-3`}
-                            >
-                                <div className="flex justify-between">
-                                    <div>
-                                        <h4 className={`font-medium ${isCurrentJob ? 'text-green-400' : ''}`}>
-                                            {job.title} {isCurrentJob && '(Current Job)'}
-                                        </h4>
-                                        <div className="grid grid-cols-3 gap-2 mt-1 text-sm">
-                                            <div>Salary: <span className="text-green-400">${job.salary}/week</span></div>
-                                            <div>Education req: <span className={player.education >= job.eduReq ? 'text-green-400' : 'text-red-400'}>{job.eduReq}</span></div>
-                                            <div>Experience req: <span className={player.experience >= job.expReq ? 'text-green-400' : 'text-red-400'}>{job.expReq}</span></div>
+                            <FeatureMotionWrapper key={index} index={index}>
+                                <div
+                                    className={`border transition duration-300 hover:bg-gradient-to-r hover:from-indigo-500 hover:via-purple-500 hover:to-teal-400 
+                              ${isCurrentJob ? ' border-2 border-purple-500 bg-gradient-to-r from-indigo-500 via-purple-500 to-teal-400' : canApply ? 'border-blue-500' : 'border-gray-700'} 
+                              rounded-lg p-3`}
+                                >
+                                    <div className="flex flex-col md:flex-row md:justify-between gap-3">
+                                        <div>
+                                            <h4 className={`font-medium ${isCurrentJob ? 'text-green-400' : ''}`}>
+                                                {job.title} {isCurrentJob && '(Current Job)'}
+                                            </h4>
+                                            <div className="grid grid-cols-3 gap-2 mt-1 text-sm">
+                                                <div>
+                                                    Salary:{' '}
+                                                    <span className="text-green-400">${job.salary}/week</span>
+                                                </div>
+                                                <div>
+                                                    Education req:{' '}
+                                                    <span className={player.education >= job.eduReq ? 'text-green-400' : 'text-red-400'}>
+                                                        {job.eduReq}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    Experience req:{' '}
+                                                    <span className={player.experience >= job.expReq ? 'text-green-400' : 'text-red-400'}>
+                                                        {job.expReq}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    {!isCurrentJob && (
-                                        <button
-                                            onClick={() => applyForJob(job)}
-                                            disabled={!canApply}
-                                            className={`py-1 px-4 rounded ${canApply ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}
-                                        >
-                                            Apply
-                                        </button>
-                                    )}
+                                        {!isCurrentJob && (
+                                            <button
+                                                onClick={() => applyForJob(job)}
+                                                disabled={!canApply}
+                                                className={`w-full md:w-auto py-2 px-4 rounded transition 
+                                      ${canApply
+                                                        ? 'bg-blue-600 hover:bg-blue-500 text-white'
+                                                        : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                                                    }`}
+                                            >
+                                                Apply
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
+                            </FeatureMotionWrapper>
+
+
+
                         );
                     })}
                 </div>
             </div>
+
 
             <div className="bg-gray-900 p-4 rounded-lg">
                 <h3 className="text-lg font-semibold mb-2">Your Qualifications</h3>
