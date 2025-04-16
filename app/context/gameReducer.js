@@ -76,6 +76,7 @@ function gameReducer(state, action) {
             partner: action.payload.partner,
             dateCount: 1,
             happiness: 30, // Initial relationship happiness
+            health: state.player.relationship?.health || 80, // Ensure health is initialized
           },
         },
         message: `You've started dating ${action.payload.partner.name}!`,
@@ -104,7 +105,6 @@ function gameReducer(state, action) {
         },
         message: `You had a wonderful date with ${action.payload.partner.name} and your relationship grew stronger!`,
       };
-
     case "BREAK_UP":
       const partnerName =
         state.player.relationship.partner?.name || "your partner";
@@ -118,7 +118,7 @@ function gameReducer(state, action) {
             partner: null,
             dateCount: 0,
             happiness: 0,
-            health: state.player.relationship.health || 80, // Keep the health stat
+            health: state.player.relationship?.health || 80, // Use existing value or default
           },
         },
         message: `You broke up with ${partnerName}. It's for the best, but it still hurts.`,
@@ -399,102 +399,6 @@ function gameReducer(state, action) {
         ...state,
         currentScreen: action.payload.screen,
       };
-
-    // case "USE_TIME":
-    //   const newTimeLeft = state.player.timeLeft - action.payload.amount;
-
-    //   console.log("Processing USE_TIME:", {
-    //     before: state.player.timeLeft,
-    //     amount: action.payload.amount,
-    //     after: newTimeLeft,
-    //   });
-
-    //   // If time runs out for current player
-    //   if (newTimeLeft <= 0) {
-    //     // Create updated player with new week and reset time
-    //     const updatedPlayer = {
-    //       ...state.player,
-    //       week: state.player.week + 1,
-    //       timeLeft: 100,
-    //       energy: Math.min(state.player.energy + 20, 100),
-    //       happiness:
-    //         state.player.happiness > 50
-    //           ? state.player.happiness - 5
-    //           : state.player.happiness,
-    //     };
-
-    //     // Define message variable
-    //     let message = "";
-
-    //     // Check if rent is due
-    //     if (updatedPlayer.rental && updatedPlayer.rental.hasApartment) {
-    //       const weeksSinceLastPayment = updatedPlayer.rental.lastPaidWeek
-    //         ? updatedPlayer.week - updatedPlayer.rental.lastPaidWeek
-    //         : 0;
-
-    //       // If 4 weeks have passed since last payment
-    //       if (weeksSinceLastPayment >= 4) {
-    //         updatedPlayer.rental.rentDue = true;
-    //         updatedPlayer.rental.missedPayments += 1;
-    //         updatedPlayer.happiness = Math.max(updatedPlayer.happiness - 10, 0);
-    //         message = `Week ${updatedPlayer.week} has begun! Your rent is due.`;
-    //       }
-    //     }
-
-    //     // Update the players array with the current player's updated info
-    //     const updatedPlayers = state.players.map((p) =>
-    //       p.id === state.currentPlayerId ? updatedPlayer : p
-    //     );
-
-    //     // Check if multiplayer mode
-    //     if (state.totalPlayers > 1) {
-    //       // Update players array but switch to next player
-    //       const nextPlayerId =
-    //         state.currentPlayerId === state.totalPlayers
-    //           ? 1
-    //           : state.currentPlayerId + 1;
-    //       // Find the next player from the players array
-    //       const nextPlayer = updatedPlayers.find((p) => p.id === nextPlayerId);
-    //       return {
-    //         ...state,
-    //         players: updatedPlayers,
-    //         currentPlayerId: nextPlayerId,
-    //         player: nextPlayer, // Switch to next player
-    //         currentScreen: "map",
-    //         message:
-    //           message ||
-    //           `Player ${nextPlayerId}'s turn! Week ${nextPlayer.week} continues.`,
-    //       };
-    //     } else {
-    //       // Single player mode - continue with same player, new week
-    //       return {
-    //         ...state,
-    //         players: updatedPlayers,
-    //         player: updatedPlayer,
-    //         currentScreen: "map",
-    //         message:
-    //           message ||
-    //           `Week ${updatedPlayer.week} has begun! You have a fresh 100 time units.`,
-    //       };
-    //     }
-    //   }
-
-    //   // If time still remains, update both player object and players array
-    //   const updatedPlayer = {
-    //     ...state.player,
-    //     timeLeft: newTimeLeft,
-    //   };
-
-    //   // Make sure to update the player in the players array as well
-    //   const updatedPlayers = state.players.map((p) =>
-    //     p.id === state.currentPlayerId ? updatedPlayer : p
-    //   );
-
-    //   return {
-    //     ...state,
-    //     player: updatedPlayer,
-    //     players: updatedPlayers,
-    //   };
 
     case "USE_TIME":
       const newTimeLeft = state.player.timeLeft - action.payload.amount;
@@ -857,6 +761,10 @@ function gameReducer(state, action) {
         id: player.id,
         name: player.name,
         avatar: player.avatar,
+        relationship: {
+          ...initialState.player.relationship,
+          health: 80, // Explicitly set health
+        },
       }));
 
       if (initializedPlayers.length === 0) {

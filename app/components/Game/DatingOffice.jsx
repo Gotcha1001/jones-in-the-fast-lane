@@ -246,7 +246,7 @@ export default function DatingOffice() {
     }, []); // Empty dependency array means this runs once when component mounts
 
     // Ensure player.relationship exists
-    const relationship = player.relationship || { isDating: false };
+    const relationship = player.relationship || { isDating: false, health: 80 };
 
     const handleStartRelationship = (person) => {
         if (relationship.isDating) {
@@ -375,7 +375,7 @@ export default function DatingOffice() {
                         </div>
                         <div className="p-2 bg-gray-700 rounded">
                             <span className="text-gray-400">Health:</span>
-                            <span className="ml-2 text-red-400">{relationship.health || 80}/100</span>
+                            <span className="ml-2 text-red-400">{(relationship.health !== undefined ? relationship.health : 80)}/100</span>
                         </div>
                     </div>
                 </div>
