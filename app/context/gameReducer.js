@@ -423,49 +423,51 @@ function gameReducer(state, action) {
               : state.player.happiness,
         };
 
-        // Define message variable
+        // Initialize message variable
         let message = "";
 
-        // Generate a random event for the week transition (about 70% chance)
+        // Generate a random event for the week transition
         let randomEvent = null;
         if (Math.random() < 0.7) {
           randomEvent = getRandomEvent(updatedPlayer);
 
-          // Apply event effects (similar to HANDLE_RANDOM_EVENT case)
-          Object.entries(randomEvent.effects).forEach(([stat, change]) => {
-            switch (stat) {
-              case "cash":
-                updatedPlayer.cash = Math.max(0, updatedPlayer.cash + change);
-                break;
-              case "happiness":
-                updatedPlayer.happiness = Math.max(
-                  0,
-                  Math.min(100, updatedPlayer.happiness + change)
-                );
-                break;
-              case "energy":
-                updatedPlayer.energy = Math.max(
-                  0,
-                  Math.min(100, updatedPlayer.energy + change)
-                );
-                break;
-              case "education":
-                updatedPlayer.education = Math.max(
-                  0,
-                  Math.min(100, updatedPlayer.education + change)
-                );
-                break;
-              case "experience":
-                updatedPlayer.experience = Math.max(
-                  0,
-                  Math.min(100, updatedPlayer.experience + change)
-                );
-                break;
-            }
-          });
+          // Apply event effects
+          if (randomEvent && randomEvent.effects) {
+            Object.entries(randomEvent.effects).forEach(([stat, change]) => {
+              switch (stat) {
+                case "cash":
+                  updatedPlayer.cash = Math.max(0, updatedPlayer.cash + change);
+                  break;
+                case "happiness":
+                  updatedPlayer.happiness = Math.max(
+                    0,
+                    Math.min(100, updatedPlayer.happiness + change)
+                  );
+                  break;
+                case "energy":
+                  updatedPlayer.energy = Math.max(
+                    0,
+                    Math.min(100, updatedPlayer.energy + change)
+                  );
+                  break;
+                case "education":
+                  updatedPlayer.education = Math.max(
+                    0,
+                    Math.min(100, updatedPlayer.education + change)
+                  );
+                  break;
+                case "experience":
+                  updatedPlayer.experience = Math.max(
+                    0,
+                    Math.min(100, updatedPlayer.experience + change)
+                  );
+                  break;
+              }
+            });
+          }
         }
 
-        // Check if rent is due
+        // Check if rent is due - add null/undefined checks
         if (updatedPlayer.rental && updatedPlayer.rental.hasApartment) {
           const weeksSinceLastPayment = updatedPlayer.rental.lastPaidWeek
             ? updatedPlayer.week - updatedPlayer.rental.lastPaidWeek
@@ -473,8 +475,11 @@ function gameReducer(state, action) {
 
           // If 4 weeks have passed since last payment
           if (weeksSinceLastPayment >= 4) {
-            updatedPlayer.rental.rentDue = true;
-            updatedPlayer.rental.missedPayments += 1;
+            updatedPlayer.rental = {
+              ...updatedPlayer.rental,
+              rentDue: true,
+              missedPayments: (updatedPlayer.rental.missedPayments || 0) + 1,
+            };
             updatedPlayer.happiness = Math.max(updatedPlayer.happiness - 10, 0);
             message = `Week ${updatedPlayer.week} has begun! Your rent is due.`;
           }
@@ -492,8 +497,15 @@ function gameReducer(state, action) {
             state.currentPlayerId === state.totalPlayers
               ? 1
               : state.currentPlayerId + 1;
+
           // Find the next player from the players array
           const nextPlayer = updatedPlayers.find((p) => p.id === nextPlayerId);
+
+          // Make sure nextPlayer exists
+          if (!nextPlayer) {
+            console.error("Next player not found:", nextPlayerId);
+            return state; // Return current state to avoid crashes
+          }
 
           return {
             ...state,
@@ -505,8 +517,8 @@ function gameReducer(state, action) {
             message:
               message ||
               `Player ${nextPlayerId}'s turn! Week ${nextPlayer.week} continues.`,
-            lastRandomEvent: randomEvent, // Store the event for UI reference
-            showRandomEvent: randomEvent !== null, // Flag to show the event dialog
+            lastRandomEvent: randomEvent,
+            showRandomEvent: randomEvent !== null,
           };
         } else {
           // Single player mode - continue with same player, new week
@@ -518,8 +530,8 @@ function gameReducer(state, action) {
             message:
               message ||
               `Week ${updatedPlayer.week} has begun! You have a fresh 100 time units.`,
-            lastRandomEvent: randomEvent, // Store the event for UI reference
-            showRandomEvent: randomEvent !== null, // Flag to show the event dialog
+            lastRandomEvent: randomEvent,
+            showRandomEvent: randomEvent !== null,
           };
         }
       }
