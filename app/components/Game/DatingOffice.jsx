@@ -1,8 +1,11 @@
+
+
 // import { useGame } from '@/app/context/GameContext';
 // import { initAudio, loadDatingOfficeMusic, playDatingOfficeMusic, stopDatingOfficeMusic } from '@/data/audioManager';
 // import { useState, useEffect } from 'react';
 // import { datingOptions } from '@/data/datingData';
 // import DatingOption from './DatingOption';
+
 
 // export default function DatingOffice() {
 //     const { state, dispatch } = useGame();
@@ -24,11 +27,14 @@
 //         };
 //     }, []); // Empty dependency array means this runs once when component mounts
 
+//     // Ensure player.relationship exists
+//     const relationship = player.relationship || { isDating: false, health: 80 };
+
 //     const handleStartRelationship = (person) => {
-//         if (player.relationship.isDating) {
+//         if (relationship.isDating) {
 //             dispatch({
 //                 type: 'SET_MESSAGE',
-//                 payload: { text: `You're already dating ${player.relationship.partner.name}. You need to break up first.` }
+//                 payload: { text: `You're already dating ${relationship.partner?.name || 'someone'}. You need to break up first.` }
 //             });
 //             return;
 //         }
@@ -78,8 +84,8 @@
 //     };
 
 //     // Filter dating options based on current relationship status and gender filter
-//     const filteredDatingOptions = player.relationship.isDating
-//         ? [player.relationship.partner]
+//     const filteredDatingOptions = relationship.isDating && relationship.partner
+//         ? [relationship.partner]
 //         : datingOptions.filter(person => {
 //             if (genderFilter === 'all') return true;
 //             return genderFilter === 'male' ? person.gender === 'Male' : person.gender === 'Female';
@@ -95,7 +101,7 @@
 //                 playsInline
 //                 className="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-50"
 //             >
-//                 <source src="/videos/datingoffice.mp4" type="video/mp4" />
+//                 <source src="https://cdn.pixabay.com/video/2024/02/13/200533-913022333_tiny.jpg" type="video/mp4" />
 //                 Your browser does not support the video tag.
 //             </video>
 
@@ -126,8 +132,8 @@
 //                     </div>
 //                     <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-red-500 p-3 rounded-lg shadow-md">
 //                         <p className="text-sm italic text-white">
-//                             {player.relationship.isDating
-//                                 ? `You're currently dating ${player.relationship.partner.name}. You've been on ${player.relationship.dateCount} date(s) together.`
+//                             {relationship.isDating && relationship.partner
+//                                 ? `You're currently dating ${relationship.partner.name}. You've been on ${relationship.dateCount || 0} date(s) together.`
 //                                 : "Welcome to the Dating Office! Find your perfect match and enjoy some quality time together."}
 //                         </p>
 //                     </div>
@@ -136,7 +142,7 @@
 //                 {/* Player Information */}
 //                 <div className="bg-gray-800 p-4 rounded mb-4">
 //                     <h3 className="text-lg font-semibold mb-2">Your Status</h3>
-//                     <div className="grid grid-cols-4 gap-4">
+//                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 //                         <div className="p-2 bg-gray-700 rounded">
 //                             <span className="text-gray-400">Cash:</span>
 //                             <span className="ml-2 text-green-400">${player.cash}</span>
@@ -151,13 +157,13 @@
 //                         </div>
 //                         <div className="p-2 bg-gray-700 rounded">
 //                             <span className="text-gray-400">Health:</span>
-//                             <span className="ml-2 text-red-400">{player.relationship.health || 80}/100</span>
+//                             <span className="ml-2 text-red-400">{(relationship.health !== undefined ? relationship.health : 80)}/100</span>
 //                         </div>
 //                     </div>
 //                 </div>
 
 //                 {/* Gender Filter (only show when not dating) */}
-//                 {!player.relationship.isDating && (
+//                 {!relationship.isDating && (
 //                     <div className="flex justify-center mb-4">
 //                         <div className="bg-gray-800 rounded p-2 inline-flex shadow-md">
 //                             <button
@@ -185,7 +191,7 @@
 //                 {/* Dating Options */}
 //                 <div className="bg-gray-800 p-4 rounded mb-4">
 //                     <h3 className="text-lg font-semibold mb-2">
-//                         {player.relationship.isDating ? "Your Relationship" : "Dating Options"}
+//                         {relationship.isDating ? "Your Relationship" : "Dating Options"}
 //                     </h3>
 
 //                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -194,7 +200,7 @@
 //                                 key={person.id}
 //                                 person={person}
 //                                 player={player}
-//                                 isDating={player.relationship.isDating}
+//                                 isDating={relationship.isDating}
 //                                 onStartRelationship={handleStartRelationship}
 //                                 onGoOnDate={handleGoOnDate}
 //                                 onBreakUp={handleBreakUp}
@@ -217,6 +223,8 @@
 //         </div>
 //     );
 // }
+
+
 
 import { useGame } from '@/app/context/GameContext';
 import { initAudio, loadDatingOfficeMusic, playDatingOfficeMusic, stopDatingOfficeMusic } from '@/data/audioManager';
@@ -319,7 +327,7 @@ export default function DatingOffice() {
                 playsInline
                 className="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-50"
             >
-                <source src="/videos/datingoffice.mp4" type="video/mp4" />
+                <source src="https://cdn.pixabay.com/video/2024/02/13/200533-913022333_tiny.jpg" type="video/mp4" />
                 Your browser does not support the video tag.
             </video>
 
@@ -335,20 +343,21 @@ export default function DatingOffice() {
                     </button>
                 </div>
 
-                {/* Office Image */}
-                <div className="flex mb-4">
-                    <div className="flex-shrink-0 mr-4">
+                {/* Office Image - UPDATED LAYOUT */}
+                <div className="mb-6 flex flex-col items-center">
+                    <div className="flex justify-center mb-6 mt-4">
                         <img
                             src="/datingoffice.jpg"
                             alt="Dating Office"
-                            className="w-32 h-32 rounded-full border-2 border-pink-500 shadow-lg"
+                            className="w-60 h-60 md:w-72 md:h-72 rounded-full border-4 border-pink-500 shadow-xl object-cover"
                             onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.src = "https://img.freepik.com/free-photo/dating-office-with-heart-decorations_23-2149193485.jpg";
                             }}
                         />
                     </div>
-                    <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-red-500 p-3 rounded-lg shadow-md">
+
+                    <div className="mt-4 bg-gradient-to-r from-pink-500 via-purple-500 to-red-500 px-6 py-4 rounded-lg shadow-md max-w-xl text-center">
                         <p className="text-sm italic text-white">
                             {relationship.isDating && relationship.partner
                                 ? `You're currently dating ${relationship.partner.name}. You've been on ${relationship.dateCount || 0} date(s) together.`
@@ -360,7 +369,7 @@ export default function DatingOffice() {
                 {/* Player Information */}
                 <div className="bg-gray-800 p-4 rounded mb-4">
                     <h3 className="text-lg font-semibold mb-2">Your Status</h3>
-                    <div className="grid grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div className="p-2 bg-gray-700 rounded">
                             <span className="text-gray-400">Cash:</span>
                             <span className="ml-2 text-green-400">${player.cash}</span>
