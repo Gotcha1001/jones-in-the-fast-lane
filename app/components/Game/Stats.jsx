@@ -121,7 +121,7 @@ export default function Stats() {
                 <div className="bg-gradient-to-tr from-indigo-500 via-black to-purple-900 p-2 rounded">
                     Relationship: {player.relationship.isDating ?
                         <>
-                            Dating {player.relationship.partner}
+                            Dating {player.relationship.partner.name}
                             <button onClick={handleBreakup} className="ml-2 bg-red-500 hover:bg-red-400 text-white px-2 py-0.5 rounded text-xs">
                                 Break Up
                             </button>

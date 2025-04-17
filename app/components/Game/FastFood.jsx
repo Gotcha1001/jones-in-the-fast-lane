@@ -13,6 +13,16 @@ export default function FastFood() {
         { id: 2, name: "Regular Combo", price: 10, energy: 20, happiness: 10 },
         { id: 3, name: "Super Size Meal", price: 15, energy: 30, happiness: 15 },
         { id: 4, name: "Healthy Option", price: 12, energy: 25, happiness: 8 },
+        { id: 5, name: "Code Crunch Burger", price: 8, energy: 15, happiness: 12 },
+        { id: 6, name: "Boolean Breakfast", price: 7, energy: 18, happiness: 9 },
+        { id: 7, name: "Algorithm Avocado Toast", price: 14, energy: 22, happiness: 14 },
+        { id: 8, name: "Recursive Ribs", price: 18, energy: 35, happiness: 18 },
+        { id: 9, name: "Function Fries", price: 4, energy: 8, happiness: 7 },
+        { id: 10, name: "Exception Enchiladas", price: 11, energy: 25, happiness: 13 },
+        { id: 11, name: "Python Protein Bowl", price: 16, energy: 30, happiness: 10 },
+        { id: 12, name: "Debugging Donuts", price: 6, energy: 12, happiness: 16 },
+        { id: 13, name: "Syntax Smoothie", price: 9, energy: 15, happiness: 14 },
+        { id: 14, name: "Loop Lasagna", price: 13, energy: 28, happiness: 17 }
     ];
 
     // Add useEffect to handle fast food restaurant music
