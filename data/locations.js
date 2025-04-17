@@ -49,7 +49,7 @@ export const locations = {
     image:
       "https://img.freepik.com/free-photo/cinematic-style-mall_23-2151551178.jpg",
     mapX: 15,
-    mapY: 88,
+    mapY: 65,
     actions: ["shop"],
   },
   leisureCenter: {
@@ -57,7 +57,7 @@ export const locations = {
     description: "Have fun and relax",
     image:
       "https://img.freepik.com/free-photo/view-backyard-garden-digital-art-style_23-2151488199.jpg",
-    mapX: 54,
+    mapX: 20,
     mapY: 88,
     actions: ["leisure"],
   },
@@ -76,7 +76,7 @@ export const locations = {
     image:
       "https://img.freepik.com/free-photo/delicious-burger-outdoors_23-2150902260.jpg",
     mapX: 15, // Updated position to fit better in your path
-    mapY: 50, // Updated position to fit better in your path
+    mapY: 40, // Updated position to fit better in your path
     actions: ["fastFood"],
   },
   datingOffice: {
@@ -87,5 +87,15 @@ export const locations = {
     mapX: 69,
     mapY: 15,
     actions: ["datingOffice"],
+  },
+
+  healingCentre: {
+    name: "Zen Healing Centre",
+    description: "Boost your health and happiness",
+    image:
+      "https://img.freepik.com/free-photo/adult-holding-ball-light_23-2149711538.jpg?uid=R194451028&ga=GA1.1.1480099583.1741975489&semt=ais_hybrid&w=740",
+    mapX: 57,
+    mapY: 88,
+    actions: ["healingCentre"],
   },
 };

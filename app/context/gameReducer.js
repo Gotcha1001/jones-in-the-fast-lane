@@ -400,7 +400,34 @@ function gameReducer(state, action) {
         currentScreen: action.payload.screen,
       };
 
+    case "PURCHASE_HEALING_SERVICE":
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          cash: state.player.cash - action.payload.cost,
+          relationship: {
+            ...state.player.relationship,
+            health: Math.min(
+              state.player.relationship.health + action.payload.health,
+              100
+            ),
+          },
+          happiness: Math.min(
+            state.player.happiness + action.payload.happiness,
+            100
+          ),
+        },
+        message: `You enjoyed a ${action.payload.service.name} for $${action.payload.cost}!`,
+      };
+
     case "USE_TIME":
+      // Skip time check if player is walking between locations
+      if (state.isWalking) {
+        console.log("Player is walking, skipping time check");
+        return state;
+      }
+
       const newTimeLeft = state.player.timeLeft - action.payload.amount;
 
       console.log("Processing USE_TIME:", {
@@ -672,6 +699,87 @@ function gameReducer(state, action) {
         message: null,
       };
 
+    // case "CHECK_GOALS":
+    //   const { player, goals } = state;
+
+    //   // Check if player has one of the winning jobs
+    //   const hasWinningJob =
+    //     player.job && goals.winningJobs.includes(player.job.title);
+
+    //   // Check if player has a luxury apartment
+    //   const hasLuxuryApartment =
+    //     player.rental &&
+    //     player.rental.hasApartment &&
+    //     player.rental.rentAmount === 200;
+
+    //   // Modified winning condition: must have BOTH career path AND luxury apartment
+    //   const achieved =
+    //     player.cash >= goals.cash &&
+    //     player.education >= goals.education &&
+    //     player.happiness >= goals.happiness &&
+    //     hasWinningJob &&
+    //     hasLuxuryApartment;
+
+    //   // Create detailed progress message
+    //   const progressDetails = {
+    //     cash: {
+    //       current: player.cash,
+    //       target: goals.cash,
+    //       achieved: player.cash >= goals.cash,
+    //     },
+    //     education: {
+    //       current: player.education,
+    //       target: goals.education,
+    //       achieved: player.education >= goals.education,
+    //     },
+    //     happiness: {
+    //       current: player.happiness,
+    //       target: goals.happiness,
+    //       achieved: player.happiness >= goals.happiness,
+    //     },
+    //     job: {
+    //       current: player.job?.title || "None",
+    //       target: goals.winningJobs,
+    //       achieved: hasWinningJob,
+    //     },
+    //     luxury: {
+    //       current:
+    //         player.rental?.rentAmount === 200
+    //           ? "Luxury Apartment"
+    //           : "Not Luxury",
+    //       achieved: hasLuxuryApartment,
+    //     },
+    //   };
+
+    //   console.log("Checking goals:", {
+    //     achieved,
+    //     cash: `${player.cash}/${goals.cash}`,
+    //     education: `${player.education}/${goals.education}`,
+    //     happiness: `${player.happiness}/${goals.happiness}`,
+    //     job: `${
+    //       player.job ? player.job.title : "None"
+    //     }/${goals.winningJobs.join(" or ")}`,
+    //     luxury: hasLuxuryApartment ? "Yes" : "No",
+    //   });
+
+    //   if (achieved) {
+    //     return {
+    //       ...state,
+    //       gameWon: true,
+    //       gameRunning: false,
+    //       currentScreen: "gameOver",
+    //       message:
+    //         "🎉 Congratulations! You've won the game by achieving BOTH career success AND luxury living! 🎉",
+    //     };
+    //   }
+
+    //   // Return progress details in the state temporarily
+    //   return {
+    //     ...state,
+    //     message: "Here's your progress toward victory!",
+    //     currentScreen: "goals", // Switch to a goals screen
+    //   };
+
     case "CHECK_GOALS":
       const { player, goals } = state;
 
@@ -685,13 +793,17 @@ function gameReducer(state, action) {
         player.rental.hasApartment &&
         player.rental.rentAmount === 200;
 
-      // Modified winning condition: must have BOTH career path AND luxury apartment
+      // Check if player has sufficient health
+      const hasGoodHealth = player.relationship.health >= 80;
+
+      // Modified winning condition: must have career path, luxury apartment AND good health
       const achieved =
         player.cash >= goals.cash &&
         player.education >= goals.education &&
         player.happiness >= goals.happiness &&
         hasWinningJob &&
-        hasLuxuryApartment;
+        hasLuxuryApartment &&
+        hasGoodHealth;
 
       // Create detailed progress message
       const progressDetails = {
@@ -722,6 +834,11 @@ function gameReducer(state, action) {
               : "Not Luxury",
           achieved: hasLuxuryApartment,
         },
+        health: {
+          current: player.relationship.health,
+          target: 80,
+          achieved: hasGoodHealth,
+        },
       };
 
       console.log("Checking goals:", {
@@ -733,6 +850,7 @@ function gameReducer(state, action) {
           player.job ? player.job.title : "None"
         }/${goals.winningJobs.join(" or ")}`,
         luxury: hasLuxuryApartment ? "Yes" : "No",
+        health: `${player.relationship.health}/80`,
       });
 
       if (achieved) {
@@ -742,7 +860,7 @@ function gameReducer(state, action) {
           gameRunning: false,
           currentScreen: "gameOver",
           message:
-            "🎉 Congratulations! You've won the game by achieving BOTH career success AND luxury living! 🎉",
+            "🎉 Congratulations! You've won the game by achieving career success, luxury living, AND excellent health! 🎉",
         };
       }
 

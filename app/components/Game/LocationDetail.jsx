@@ -67,6 +67,15 @@ export default function LocationDetail({ locationId }) {
                     return;
                 }
 
+
+            // In your handleAction function, add a case for 'healingCentre':
+            case 'healingCentre':
+                dispatch({
+                    type: 'CHANGE_SCREEN',
+                    payload: { screen: 'healingCentre' }
+                });
+                break;
+
                 // Redirect to rental office
                 dispatch({
                     type: 'CHANGE_SCREEN',
@@ -370,6 +379,13 @@ export default function LocationDetail({ locationId }) {
                                 case 'workplace':
                                     actionName = 'Visit Workplace';
                                     actionDesc = 'Go to your workplace interface';
+                                    break;
+
+
+                                // Then in the action mapping section lower down
+                                case 'healingCentre':
+                                    actionName = 'Visit Healing Centre';
+                                    actionDesc = 'Boost your health and wellbeing';
                                     break;
 
 

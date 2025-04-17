@@ -499,3 +499,51 @@ export const stopDatingOfficeMusic = () => {
     datingOfficeMusicSource = null;
   }
 };
+
+// HEALING CENTRE MUSIC
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+let healingCentreMusic = null;
+let healingCentreMusicSource = null;
+
+export const loadHealingCentreMusic = async (url) => {
+  if (!audioContext) {
+    if (!initAudio()) return;
+  }
+
+  try {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    healingCentreMusic = audioBuffer;
+    return true;
+  } catch (error) {
+    console.error("Error loading healing centre music:", error);
+    return false;
+  }
+};
+
+export const playHealingCentreMusic = () => {
+  if (!audioContext || !healingCentreMusic) return;
+
+  // Stop previous music if playing
+  if (healingCentreMusicSource) {
+    healingCentreMusicSource.stop();
+  }
+
+  // Create new source
+  const musicSource = audioContext.createBufferSource();
+  musicSource.buffer = healingCentreMusic;
+  musicSource.loop = true;
+  musicSource.connect(audioContext.destination);
+  musicSource.start();
+
+  healingCentreMusicSource = musicSource;
+  return musicSource;
+};
+
+export const stopHealingCentreMusic = () => {
+  if (healingCentreMusicSource) {
+    healingCentreMusicSource.stop();
+    healingCentreMusicSource = null;
+  }
+};

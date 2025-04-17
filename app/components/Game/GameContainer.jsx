@@ -26,6 +26,7 @@ import GoalsTracker from './GoalsTracker';
 import RandomEventAlert from './RandomEventAlert';
 import FastFood from './FastFood';
 import DatingOffice from './DatingOffice';
+import HealingCentre from './HealingCentre';
 
 export default function GameContainer() {
     const { state, dispatch } = useGame();
@@ -78,6 +79,8 @@ export default function GameContainer() {
                 return <University />;
             case 'datingOffice':
                 return <DatingOffice />;
+            case 'healingCentre':
+                return <HealingCentre />;
             case 'apartment':
                 return <Apartment />;
             case 'rentoffice':

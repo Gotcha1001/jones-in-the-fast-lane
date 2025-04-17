@@ -74,10 +74,11 @@ export default function JobOffice() {
                         return (
                             <FeatureMotionWrapper key={index} index={index}>
                                 <div
-                                    className={`border transition duration-300 hover:bg-gradient-to-r hover:from-indigo-500 hover:via-purple-500 hover:to-teal-400 
-                              ${isCurrentJob ? ' border-2 border-purple-500 bg-gradient-to-r from-indigo-500 via-purple-500 to-teal-400' : canApply ? 'border-blue-500' : 'border-gray-700'} 
-                              rounded-lg p-3`}
+                                    className={`border transition duration-300 hover:bg-gradient-to-r hover:from-indigo-900 hover:via-purple-900 hover:to-teal-900 
+    ${isCurrentJob ? ' border-2 bg-gradient-to-r from-indigo-900 via-purple-900 to-teal-900' : canApply ? 'border-blue-500' : 'border-gray-700'} 
+    rounded-lg p-3`}
                                 >
+
                                     <div className="flex flex-col md:flex-row md:justify-between gap-3">
                                         <div>
                                             <h4 className={`font-medium ${isCurrentJob ? 'text-green-400' : ''}`}>
@@ -107,14 +108,15 @@ export default function JobOffice() {
                                             <button
                                                 onClick={() => applyForJob(job)}
                                                 disabled={!canApply}
-                                                className={`w-full md:w-auto py-2 px-4 rounded transition 
-                                      ${canApply
-                                                        ? 'bg-blue-600 hover:bg-blue-500 text-white'
-                                                        : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                                                className={`w-full md:w-auto py-2 px-4 rounded-xl text-white font-semibold transition duration-300
+                                   ${canApply
+                                                        ? 'bg-gradient-to-r from-indigo-600 via-purple-700 to-indigo-800 hover:brightness-110 shadow-lg'
+                                                        : 'bg-gradient-to-r from-black via-gray-400 to-white text-gray-700 cursor-not-allowed'
                                                     }`}
                                             >
                                                 Apply
                                             </button>
+
                                         )}
                                     </div>
                                 </div>

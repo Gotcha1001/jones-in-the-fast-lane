@@ -43,6 +43,7 @@ export default function Map() {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
+
     // Use the mapX and mapY directly from locations object
     const locationPositions = useMemo(() => {
         const positions = {};
@@ -235,8 +236,10 @@ export default function Map() {
 
         setTimeout(() => {
             dispatch({ type: 'COMPLETE_MOVE', payload: { locationId } });
+            // Add this line to deduct time:
+            dispatch({ type: 'USE_TIME', payload: { amount: travelTime } });
             setTargetLocation(null);
-        }, 5000); // Matched to animation duration
+        }, 5000);
     };
 
     const enterLocation = (locationId) => {
@@ -280,13 +283,15 @@ export default function Map() {
         <div className="mt-4">
             <h3 className="text-lg font-bold mb-3">City Map</h3>
             <div
-                className="map-background w-full h-[90vh] relative bg-gray-900 rounded-lg overflow-hidden shadow-xl px-4 sm:px-8"
+                className="map-background w-full h-[60vh] sm:h-[80vh] lg:h-[120vh] relative bg-gray-900 rounded-lg overflow-hidden shadow-xl px-4 sm:px-8"
                 style={{
-                    backgroundImage: "url('/grass.jpg')",
+                    backgroundImage: "url('/logo1.jpg')",
+                    backgroundRepeat: "no-repeat",
                     backgroundSize: "cover",
-                    backgroundPosition: "center"
+                    backgroundPosition: "center",
                 }}
             >
+
                 {/* Background path image */}
                 <img
                     src="/stone2.png"
@@ -435,9 +440,10 @@ export default function Map() {
                                     className={`${isMobile ? 'h-14 w-14 md:h-22 md:w-22' : 'h-22 w-22 md:h-36 md:w-36'} rounded-full z-10`}
                                 />
                             </motion.div>
-                            <div className="mt-1 bg-black px-2 py-1 rounded text-sm text-center shadow-md">
+                            <div className="mt-1 gradient-background2 px-1 md:py-1  rounded text-xs md:text-sm text-center shadow-md">
                                 {location.name}
                             </div>
+
                         </div>
                     );
                 })}

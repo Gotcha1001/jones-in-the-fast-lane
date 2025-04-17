@@ -64,7 +64,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-24 gradient-background2 space-y-4">
+    <div className="flex flex-col items-center justify-center min-h-screen p-24 bg-gradient-to-bl from-indigo-500 via-black to-purple-900 space-y-4">
       <Image
         src="/logo2.jpg"
         alt="Logo"
