@@ -108,17 +108,17 @@ export default function Stats() {
                 </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <div className="bg-gradient-to-tr from-indigo-500 via-black to-purple-900 p-2 rounded">Cash: ${player.cash.toFixed(2)}</div>
-                <div className="bg-gradient-to-tr from-indigo-500 via-black to-purple-900 p-2 rounded">Education: {player.education}/100</div>
-                <div className="bg-gradient-to-tr from-indigo-500 via-black to-purple-900 p-2 rounded">Experience: {player.experience}/100</div>
-                <div className="bg-gradient-to-bl from-indigo-500 via-black to-purple-900 p-2 rounded">Job: {player.job ? player.job.title : 'Unemployed'}</div>
-                <div className="bg-gradient-to-tr from-indigo-500 via-black to-purple-900 p-2 rounded">Energy: {player.energy}/100</div>
-                <div className="bg-gradient-to-tr from-indigo-500 via-black to-purple-900 p-2 rounded">Happiness: {player.happiness}/100</div>
-                <div className="bg-gradient-to-tr from-indigo-500 via-black to-purple-900 p-2 rounded">Health: {player.relationship.health}/100</div>
-                <div className="bg-gradient-to-tr from-indigo-500 via-black to-purple-900 p-2 rounded">Location: {locations[player.location].name}</div>
+                <div className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded">Cash: ${player.cash.toFixed(2)}</div>
+                <div className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded">Education: {player.education}/100</div>
+                <div className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded">Experience: {player.experience}/100</div>
+                <div className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded">Job: {player.job ? player.job.title : 'Unemployed'}</div>
+                <div className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded">Energy: {player.energy}/100</div>
+                <div className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded">Happiness: {player.happiness}/100</div>
+                <div className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded">Health: {player.relationship.health}/100</div>
+                <div className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded">Location: {locations[player.location].name}</div>
 
                 {/* Relationship Status */}
-                <div className="bg-gradient-to-tr from-indigo-500 via-black to-purple-900 p-2 rounded">
+                <div className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded">
                     Relationship: {player.relationship.isDating ?
                         <>
                             Dating {player.relationship.partner.name}
@@ -129,11 +129,11 @@ export default function Stats() {
                         : 'Single'}
                 </div>
 
-                <div className="bg-gradient-to-tr from-indigo-500 via-black to-purple-900 p-2 rounded">
+                <div className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded">
                     Job Goal: {state.goals.winningJobs.join(" or ")}
                 </div>
 
-                <div className="bg-gradient-to-tr from-indigo-500 via-black to-purple-900 p-2 rounded">
+                <div className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded">
                     <button
                         onClick={checkGoals}
                         className="text-blue-400 hover:underline"

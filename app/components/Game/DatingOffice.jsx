@@ -1,5 +1,6 @@
 
 
+
 // import { useGame } from '@/app/context/GameContext';
 // import { initAudio, loadDatingOfficeMusic, playDatingOfficeMusic, stopDatingOfficeMusic } from '@/data/audioManager';
 // import { useState, useEffect } from 'react';
@@ -117,20 +118,21 @@
 //                     </button>
 //                 </div>
 
-//                 {/* Office Image */}
-//                 <div className="flex mb-4">
-//                     <div className="flex-shrink-0 mr-4">
+//                 {/* Office Image - UPDATED LAYOUT */}
+//                 <div className="mb-6 flex flex-col items-center">
+//                     <div className="flex justify-center mb-6 mt-4">
 //                         <img
 //                             src="/datingoffice.jpg"
 //                             alt="Dating Office"
-//                             className="w-32 h-32 rounded-full border-2 border-pink-500 shadow-lg"
+//                             className="w-60 h-60 md:w-72 md:h-72 rounded-full border-4 border-pink-500 shadow-xl object-cover"
 //                             onError={(e) => {
 //                                 e.target.onerror = null;
 //                                 e.target.src = "https://img.freepik.com/free-photo/dating-office-with-heart-decorations_23-2149193485.jpg";
 //                             }}
 //                         />
 //                     </div>
-//                     <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-red-500 p-3 rounded-lg shadow-md">
+
+//                     <div className="mt-4 bg-gradient-to-r from-pink-500 via-purple-500 to-red-500 px-6 py-4 rounded-lg shadow-md max-w-xl text-center">
 //                         <p className="text-sm italic text-white">
 //                             {relationship.isDating && relationship.partner
 //                                 ? `You're currently dating ${relationship.partner.name}. You've been on ${relationship.dateCount || 0} date(s) together.`
@@ -224,14 +226,12 @@
 //     );
 // }
 
-
-
 import { useGame } from '@/app/context/GameContext';
 import { initAudio, loadDatingOfficeMusic, playDatingOfficeMusic, stopDatingOfficeMusic } from '@/data/audioManager';
 import { useState, useEffect } from 'react';
 import { datingOptions } from '@/data/datingData';
 import DatingOption from './DatingOption';
-
+import { toast } from 'sonner'; // Add this import
 
 export default function DatingOffice() {
     const { state, dispatch } = useGame();
@@ -253,15 +253,24 @@ export default function DatingOffice() {
         };
     }, []); // Empty dependency array means this runs once when component mounts
 
+    // Helper function to handle both message and toast
+    const showMessage = (message) => {
+        // Set message in game state
+        dispatch({
+            type: 'SET_MESSAGE',
+            payload: { text: message }
+        });
+
+        // Show toast notification
+        toast.success(message);
+    };
+
     // Ensure player.relationship exists
     const relationship = player.relationship || { isDating: false, health: 80 };
 
     const handleStartRelationship = (person) => {
         if (relationship.isDating) {
-            dispatch({
-                type: 'SET_MESSAGE',
-                payload: { text: `You're already dating ${relationship.partner?.name || 'someone'}. You need to break up first.` }
-            });
+            showMessage(`You're already dating ${relationship.partner?.name || 'someone'}. You need to break up first.`);
             return;
         }
 
@@ -271,15 +280,14 @@ export default function DatingOffice() {
                 partner: person
             }
         });
+
         dispatch({ type: 'USE_TIME', payload: { amount: 15 } });
+        showMessage(`You've started dating ${person.name}!`);
     };
 
     const handleGoOnDate = (person) => {
         if (player.cash < person.datePrice) {
-            dispatch({
-                type: 'SET_MESSAGE',
-                payload: { text: "You don't have enough cash for this date." }
-            });
+            showMessage("You don't have enough cash for this date.");
             return;
         }
 
@@ -292,14 +300,20 @@ export default function DatingOffice() {
                 healthBoost: person.healthBoost
             }
         });
+
         dispatch({ type: 'USE_TIME', payload: { amount: 20 } });
+        showMessage(`You had a great date with ${person.name}! Your happiness increased by ${person.happinessBoost} and relationship health by ${person.healthBoost}.`);
     };
 
     const handleBreakUp = () => {
+        const partnerName = relationship.partner?.name || 'your partner';
+
         dispatch({
             type: 'BREAK_UP'
         });
+
         dispatch({ type: 'USE_TIME', payload: { amount: 10 } });
+        showMessage(`You broke up with ${partnerName}. It's time to move on.`);
     };
 
     const goBackToLocation = () => {
@@ -327,7 +341,7 @@ export default function DatingOffice() {
                 playsInline
                 className="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-50"
             >
-                <source src="https://cdn.pixabay.com/video/2024/02/13/200533-913022333_tiny.jpg" type="video/mp4" />
+                <source src="https://cdn.pixabay.com/video/2023/02/05/149481-796105914_tiny.mp4" />
                 Your browser does not support the video tag.
             </video>
 
@@ -367,7 +381,7 @@ export default function DatingOffice() {
                 </div>
 
                 {/* Player Information */}
-                <div className="bg-gray-800 p-4 rounded mb-4">
+                <div className=" p-4 rounded mb-4">
                     <h3 className="text-lg font-semibold mb-2">Your Status</h3>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div className="p-2 bg-gray-700 rounded">
@@ -420,7 +434,6 @@ export default function DatingOffice() {
                     <h3 className="text-lg font-semibold mb-2">
                         {relationship.isDating ? "Your Relationship" : "Dating Options"}
                     </h3>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {filteredDatingOptions.map(person => (
                             <DatingOption

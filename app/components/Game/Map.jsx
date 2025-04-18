@@ -217,6 +217,32 @@ export default function Map() {
         }
     }, [isWalking, targetLocation, player.location, pathNetwork]);
 
+    //FUNCTION TO END TURN IF TIME IS TOO LESS/++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+    // Add this function to your Map component
+    const checkTimeAndEndTurnIfNeeded = () => {
+        const minimumTimeForTravel = 5; // The time needed to travel anywhere
+
+        if (player.timeLeft < minimumTimeForTravel && !isWalking) {
+            // Show message
+            dispatch({
+                type: 'SET_MESSAGE',
+                payload: { text: "Not enough time left to travel. Your turn is ending..." }
+            });
+
+            // Wait 2 seconds, then end the turn
+            setTimeout(() => {
+                // This will use up all remaining time and trigger week change/next player
+                dispatch({
+                    type: 'USE_TIME',
+                    payload: { amount: player.timeLeft }
+                });
+            }, 2000);
+        }
+    };
+
     const walkToLocation = (locationId) => {
         if (isWalking || locationId === player.location) return;
 
@@ -236,15 +262,26 @@ export default function Map() {
 
         setTimeout(() => {
             dispatch({ type: 'COMPLETE_MOVE', payload: { locationId } });
-            // Add this line to deduct time:
             dispatch({ type: 'USE_TIME', payload: { amount: travelTime } });
             setTargetLocation(null);
+
+            // Add this check after the move is complete
+            checkTimeAndEndTurnIfNeeded();
         }, 5000);
     };
+
+    // Add this useEffect to check time whenever relevant values change
+    useEffect(() => {
+        if (!isWalking) {
+            checkTimeAndEndTurnIfNeeded();
+        }
+    }, [player.timeLeft, player.location, isWalking]);
 
     const enterLocation = (locationId) => {
         dispatch({ type: 'CHANGE_SCREEN', payload: { screen: 'location' } });
     };
+
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     // Get the current animated position along the path
     const getAnimatedPosition = () => {
