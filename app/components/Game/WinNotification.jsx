@@ -61,7 +61,9 @@ export default function WinNotification() {
         }
     }, [gameWon, state.viewingStats]);
 
-    if (!gameWon || state.viewingStats) return null;
+    // WinNotification.jsx
+    if (!gameWon || state.viewingStats || !player) return null;
+
 
     return (
         <AlertDialog open={gameWon} onOpenChange={() => { }}>

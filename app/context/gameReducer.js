@@ -9,62 +9,53 @@ function gameReducer(state, action) {
   const HANDLE_RANDOM_EVENT = "HANDLE_RANDOM_EVENT";
 
   switch (action.type) {
-    // Add this case to your existing gameReducer within the switch statement
     case "HANDLE_RANDOM_EVENT":
       const event = action.payload.event;
-
-      // Create a copy of the player with the event effects applied
       const playerAfterEvent = { ...state.player };
-
-      // Apply all effects from the event
       Object.entries(event.effects).forEach(([stat, change]) => {
-        // Handle each type of stat differently
         switch (stat) {
           case "cash":
-            playerAfterEvent.cash = Math.max(0, playerAfterEvent.cash + change);
+            playerAfterEvent.cash = Math.max(
+              0,
+              (playerAfterEvent.cash || 0) + change
+            );
             break;
           case "happiness":
             playerAfterEvent.happiness = Math.max(
               0,
-              Math.min(100, playerAfterEvent.happiness + change)
+              Math.min(100, (playerAfterEvent.happiness || 0) + change)
             );
             break;
           case "energy":
             playerAfterEvent.energy = Math.max(
               0,
-              Math.min(100, playerAfterEvent.energy + change)
+              Math.min(100, (playerAfterEvent.energy || 0) + change)
             );
             break;
           case "education":
             playerAfterEvent.education = Math.max(
               0,
-              Math.min(100, playerAfterEvent.education + change)
+              Math.min(100, (playerAfterEvent.education || 0) + change)
             );
             break;
           case "experience":
             playerAfterEvent.experience = Math.max(
               0,
-              Math.min(100, playerAfterEvent.experience + change)
+              Math.min(100, (playerAfterEvent.experience || 0) + change)
             );
             break;
-          // Add more cases if you have other player stats
         }
       });
-
-      // Update the players array with this player's new stats
       const UpdatedPlayers = state.players.map((p) =>
         p.id === state.currentPlayerId ? playerAfterEvent : p
       );
-
       return {
         ...state,
         player: playerAfterEvent,
         players: UpdatedPlayers,
-        lastRandomEvent: event, // Store the event for UI reference
+        lastRandomEvent: event,
         message: `${event.title}: ${event.description}`,
       };
-
-    // Add these cases to your game reducer
 
     case "START_RELATIONSHIP":
       return {
@@ -76,8 +67,8 @@ function gameReducer(state, action) {
             isDating: true,
             partner: action.payload.partner,
             dateCount: 1,
-            happiness: 30, // Initial relationship happiness
-            health: state.player.relationship?.health || 80, // Ensure health is initialized
+            happiness: 30,
+            health: state.player.relationship?.health || 80,
           },
         },
         message: `You've started dating ${action.payload.partner.name}!`,
@@ -88,15 +79,18 @@ function gameReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          cash: state.player.cash - action.payload.cost,
+          cash: (state.player.cash || 0) - action.payload.cost,
           happiness: Math.min(
-            state.player.happiness + action.payload.happinessBoost,
+            (state.player.happiness || 0) + action.payload.happinessBoost,
             100
           ),
           relationship: {
             ...state.player.relationship,
             dateCount: state.player.relationship.dateCount + 1,
-            happiness: Math.min(state.player.relationship.happiness + 15, 100),
+            happiness: Math.min(
+              (state.player.relationship.happiness || 0) + 15,
+              100
+            ),
             health: Math.min(
               (state.player.relationship.health || 80) +
                 action.payload.healthBoost,
@@ -106,6 +100,7 @@ function gameReducer(state, action) {
         },
         message: `You had a wonderful date with ${action.payload.partner.name} and your relationship grew stronger!`,
       };
+
     case "BREAK_UP":
       const partnerName =
         state.player.relationship.partner?.name || "your partner";
@@ -113,13 +108,13 @@ function gameReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          happiness: Math.max(state.player.happiness - 15, 0), // Breaking up hurts
+          happiness: Math.max((state.player.happiness || 0) - 15, 0),
           relationship: {
             isDating: false,
             partner: null,
             dateCount: 0,
             happiness: 0,
-            health: state.player.relationship?.health || 80, // Use existing value or default
+            health: state.player.relationship?.health || 80,
           },
         },
         message: `You broke up with ${partnerName}. It's for the best, but it still hurts.`,
@@ -130,12 +125,12 @@ function gameReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          cash: state.player.cash - action.payload.upgradeFee,
+          cash: (state.player.cash || 0) - action.payload.upgradeFee,
           rental: {
             ...state.player.rental,
-            lastPaidWeek: state.player.week, // Reset payment clock
+            lastPaidWeek: state.player.week,
             rentAmount: action.payload.rentAmount,
-            rentDue: false, // Reset rent due status
+            rentDue: false,
           },
         },
         message: `You upgraded your apartment! New rent is $${action.payload.rentAmount} per month.`,
@@ -146,10 +141,13 @@ function gameReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          cash: state.player.cash - action.payload.cost,
-          energy: Math.min(state.player.energy + action.payload.energy, 100),
+          cash: (state.player.cash || 0) - action.payload.cost,
+          energy: Math.min(
+            (state.player.energy || 0) + action.payload.energy,
+            100
+          ),
           happiness: Math.min(
-            state.player.happiness + action.payload.happiness,
+            (state.player.happiness || 0) + action.payload.happiness,
             100
           ),
         },
@@ -161,7 +159,7 @@ function gameReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          cash: state.player.cash - action.payload.deposit,
+          cash: (state.player.cash || 0) - action.payload.deposit,
           rental: {
             ...state.player.rental,
             hasApartment: true,
@@ -177,7 +175,7 @@ function gameReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          cash: state.player.cash - state.player.rental.rentAmount,
+          cash: (state.player.cash || 0) - state.player.rental.rentAmount,
           rental: {
             ...state.player.rental,
             lastPaidWeek: state.player.week,
@@ -189,12 +187,9 @@ function gameReducer(state, action) {
       };
 
     case "CHECK_RENT_DUE":
-      // Check if rent needs to be paid (every 4 weeks)
       const weeksSinceLastPayment = state.player.rental.lastPaidWeek
         ? state.player.week - state.player.rental.lastPaidWeek
         : 0;
-
-      // If player has an apartment and hasn't paid in 4 or more weeks
       if (state.player.rental.hasApartment && weeksSinceLastPayment >= 4) {
         return {
           ...state,
@@ -203,10 +198,9 @@ function gameReducer(state, action) {
             rental: {
               ...state.player.rental,
               rentDue: true,
-              missedPayments: state.player.rental.missedPayments + 1,
+              missedPayments: (state.player.rental.missedPayments || 0) + 1,
             },
-            // Decrease happiness if rent is late
-            happiness: Math.max(state.player.happiness - 15, 0),
+            happiness: Math.max((state.player.happiness || 0) - 15, 0),
           },
           message: "Your rent is due! Visit the Rental Office to pay.",
         };
@@ -214,9 +208,12 @@ function gameReducer(state, action) {
       return state;
 
     case "HYDRATE_STATE":
-      // Replace the entire state with the saved state
       return {
         ...action.payload,
+        player: {
+          ...action.payload.player,
+          cash: action.payload.player.cash || 0, // Ensure cash is defined
+        },
       };
 
     case "SAVE_GAME":
@@ -238,6 +235,10 @@ function gameReducer(state, action) {
       }
       return {
         ...savedGame,
+        player: {
+          ...savedGame.player,
+          cash: savedGame.player.cash || 0, // Ensure cash is defined
+        },
         message: "Game loaded successfully!",
       };
 
@@ -250,56 +251,50 @@ function gameReducer(state, action) {
         (state.player.subjects[subject] || 0) + subjectGain,
         100
       );
-
-      // Update subjects
       const updatedSubjects = {
         ...state.player.subjects,
         [subject]: newSubjectLevel,
       };
-
-      // Calculate education as the average of all subject levels
       const education = Math.floor(
         Object.values(updatedSubjects).reduce((sum, level) => sum + level, 0) /
           Object.keys(updatedSubjects).length
       );
-
       return {
         ...state,
         player: {
           ...state.player,
           subjects: updatedSubjects,
-          education: education, // Update education stat
-          energy: state.player.energy - hours * 2,
+          education,
+          energy: (state.player.energy || 0) - hours * 2,
         },
         message: `You studied ${subject} for ${hours} hours and gained ${subjectGain} points!`,
       };
-    // This action is dispatched when the player chooses to do a leisure activity
 
     case "DO_LEISURE_ACTIVITY":
       return {
         ...state,
         player: {
           ...state.player,
-          cash: state.player.cash - action.payload.cost,
+          cash: (state.player.cash || 0) - action.payload.cost,
           happiness: Math.min(
-            state.player.happiness + action.payload.happiness,
+            (state.player.happiness || 0) + action.payload.happiness,
             100
           ),
-          energy: state.player.energy - action.payload.energy,
+          energy: (state.player.energy || 0) - action.payload.energy,
         },
         message: `You enjoyed the activity and gained ${action.payload.happiness} happiness!`,
       };
 
-    // NEW BANK ACTIONS FOR DEPOSITED AND WITHDRAWLS
     case "DEPOSIT_MONEY":
       return {
         ...state,
         player: {
           ...state.player,
-          cash: state.player.cash - action.payload.amount,
+          cash: (state.player.cash || 0) - action.payload.amount,
           bankAccount: {
             ...state.player.bankAccount,
-            savings: state.player.bankAccount.savings + action.payload.amount,
+            savings:
+              (state.player.bankAccount.savings || 0) + action.payload.amount,
           },
         },
         message: `Deposited $${action.payload.amount} into your savings account.`,
@@ -310,19 +305,20 @@ function gameReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          cash: state.player.cash + action.payload.amount,
+          cash: (state.player.cash || 0) + action.payload.amount,
           bankAccount: {
             ...state.player.bankAccount,
-            savings: state.player.bankAccount.savings - action.payload.amount,
+            savings:
+              (state.player.bankAccount.savings || 0) - action.payload.amount,
           },
         },
         message: `Withdrew $${action.payload.amount} from your savings account.`,
       };
 
     case "CALCULATE_INTEREST":
-      const interestRate = 0.05; // 5% interest
+      const interestRate = 0.05;
       const interest = Math.floor(
-        state.player.bankAccount.savings * interestRate
+        (state.player.bankAccount.savings || 0) * interestRate
       );
       return {
         ...state,
@@ -330,7 +326,7 @@ function gameReducer(state, action) {
           ...state.player,
           bankAccount: {
             ...state.player.bankAccount,
-            savings: state.player.bankAccount.savings + interest,
+            savings: (state.player.bankAccount.savings || 0) + interest,
             lastInterestDate: action.payload.date,
           },
         },
@@ -338,12 +334,11 @@ function gameReducer(state, action) {
       };
 
     case "BUY_SHARES":
-      // Simply use the shares data from the payload directly
       return {
         ...state,
         player: {
           ...state.player,
-          cash: state.player.cash - action.payload.cost,
+          cash: (state.player.cash || 0) - action.payload.cost,
           shares: action.payload.shares,
         },
         message: `You bought ${action.payload.amount} shares for $${action.payload.cost}.`,
@@ -354,20 +349,16 @@ function gameReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          cash: state.player.cash + action.payload.value,
+          cash: (state.player.cash || 0) + action.payload.value,
           shares: action.payload.shares,
         },
         message: `You sold ${action.payload.amount} shares for $${action.payload.value}.`,
       };
 
     case "UPDATE_SHARES":
-      // Get current owned shares
       const currentShares = state.player.shares || [];
-
-      // Update prices while preserving ownership AND change values
       const newShares = action.payload.shares
         .filter((share) => {
-          // Keep all shares that player owns
           const ownedShare = currentShares.find((s) => s.id === share.id);
           return ownedShare && ownedShare.owned > 0;
         })
@@ -378,10 +369,9 @@ function gameReducer(state, action) {
             name: share.name,
             price: share.price,
             owned: ownedShare ? ownedShare.owned : 0,
-            change: share.change, // Make sure to include the change property
+            change: share.change,
           };
         });
-
       return {
         ...state,
         player: {
@@ -419,16 +409,16 @@ function gameReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          cash: state.player.cash - action.payload.cost,
+          cash: (state.player.cash || 0) - action.payload.cost,
           relationship: {
             ...state.player.relationship,
             health: Math.min(
-              state.player.relationship.health + action.payload.health,
+              (state.player.relationship.health || 0) + action.payload.health,
               100
             ),
           },
           happiness: Math.min(
-            state.player.happiness + action.payload.happiness,
+            (state.player.happiness || 0) + action.payload.happiness,
             100
           ),
         },
@@ -436,124 +426,105 @@ function gameReducer(state, action) {
       };
 
     case "USE_TIME":
-      // Skip time check if player is walking between locations
       if (state.isWalking) {
         console.log("Player is walking, skipping time check");
         return state;
       }
-
-      const newTimeLeft = state.player.timeLeft - action.payload.amount;
-
+      const newTimeLeft = (state.player.timeLeft || 0) - action.payload.amount;
       console.log("Processing USE_TIME:", {
         before: state.player.timeLeft,
         amount: action.payload.amount,
         after: newTimeLeft,
       });
-
-      // If time runs out for current player
       if (newTimeLeft <= 0) {
-        // Create updated player with new week and reset time
         const updatedPlayer = {
           ...state.player,
-          week: state.player.week + 1,
+          week: (state.player.week || 0) + 1,
           timeLeft: 100,
-          energy: Math.min(state.player.energy + 20, 100),
+          energy: Math.min((state.player.energy || 0) + 20, 100),
           happiness:
-            state.player.happiness > 50
-              ? state.player.happiness - 5
-              : state.player.happiness,
+            (state.player.happiness || 0) > 50
+              ? (state.player.happiness || 0) - 5
+              : state.player.happiness || 0,
+          cash: state.player.cash || 0, // Ensure cash is defined
         };
-
-        // Initialize message variable
         let message = "";
-
-        // Generate a random event for the week transition
         let randomEvent = null;
         if (Math.random() < 0.7) {
           randomEvent = getRandomEvent(updatedPlayer);
-
-          // Apply event effects
           if (randomEvent && randomEvent.effects) {
             Object.entries(randomEvent.effects).forEach(([stat, change]) => {
               switch (stat) {
                 case "cash":
-                  updatedPlayer.cash = Math.max(0, updatedPlayer.cash + change);
+                  updatedPlayer.cash = Math.max(
+                    0,
+                    (updatedPlayer.cash || 0) + change
+                  );
                   break;
                 case "happiness":
                   updatedPlayer.happiness = Math.max(
                     0,
-                    Math.min(100, updatedPlayer.happiness + change)
+                    Math.min(100, (updatedPlayer.happiness || 0) + change)
                   );
                   break;
                 case "energy":
                   updatedPlayer.energy = Math.max(
                     0,
-                    Math.min(100, updatedPlayer.energy + change)
+                    Math.min(100, (updatedPlayer.energy || 0) + change)
                   );
                   break;
                 case "education":
                   updatedPlayer.education = Math.max(
                     0,
-                    Math.min(100, updatedPlayer.education + change)
+                    Math.min(100, (updatedPlayer.education || 0) + change)
                   );
                   break;
                 case "experience":
                   updatedPlayer.experience = Math.max(
                     0,
-                    Math.min(100, updatedPlayer.experience + change)
+                    Math.min(100, (updatedPlayer.experience || 0) + change)
                   );
                   break;
               }
             });
           }
         }
-
-        // Check if rent is due - add null/undefined checks
         if (updatedPlayer.rental && updatedPlayer.rental.hasApartment) {
           const weeksSinceLastPayment = updatedPlayer.rental.lastPaidWeek
             ? updatedPlayer.week - updatedPlayer.rental.lastPaidWeek
             : 0;
-
-          // If 4 weeks have passed since last payment
           if (weeksSinceLastPayment >= 4) {
             updatedPlayer.rental = {
               ...updatedPlayer.rental,
               rentDue: true,
               missedPayments: (updatedPlayer.rental.missedPayments || 0) + 1,
             };
-            updatedPlayer.happiness = Math.max(updatedPlayer.happiness - 10, 0);
+            updatedPlayer.happiness = Math.max(
+              (updatedPlayer.happiness || 0) - 10,
+              0
+            );
             message = `Week ${updatedPlayer.week} has begun! Your rent is due.`;
           }
         }
-
-        // Update the players array with the current player's updated info
         const updatedPlayers = state.players.map((p) =>
           p.id === state.currentPlayerId ? updatedPlayer : p
         );
-
-        // Check if multiplayer mode
         if (state.totalPlayers > 1) {
-          // Update players array but switch to next player
           const nextPlayerId =
             state.currentPlayerId === state.totalPlayers
               ? 1
               : state.currentPlayerId + 1;
-
-          // Find the next player from the players array
           const nextPlayer = updatedPlayers.find((p) => p.id === nextPlayerId);
-
-          // Make sure nextPlayer exists
           if (!nextPlayer) {
             console.error("Next player not found:", nextPlayerId);
-            return state; // Return current state to avoid crashes
+            return state;
           }
-
           return {
             ...state,
             isWalking: false,
             players: updatedPlayers,
             currentPlayerId: nextPlayerId,
-            player: nextPlayer, // Switch to next player
+            player: nextPlayer,
             currentScreen: "map",
             message:
               message ||
@@ -562,7 +533,6 @@ function gameReducer(state, action) {
             showRandomEvent: randomEvent !== null,
           };
         } else {
-          // Single player mode - continue with same player, new week
           return {
             ...state,
             players: updatedPlayers,
@@ -576,39 +546,37 @@ function gameReducer(state, action) {
           };
         }
       }
-
-      // If time still remains, update both player object and players array
       const updatedPlayer = {
         ...state.player,
         timeLeft: newTimeLeft,
+        cash: state.player.cash || 0, // Ensure cash is defined
       };
-
-      // Make sure to update the player in the players array as well
       const updatedPlayers = state.players.map((p) =>
         p.id === state.currentPlayerId ? updatedPlayer : p
       );
-
       return {
         ...state,
         player: updatedPlayer,
         players: updatedPlayers,
       };
 
-    // Add another case to dismiss the random event alert
     case "DISMISS_RANDOM_EVENT":
       return {
         ...state,
         showRandomEvent: false,
       };
 
-    // Add this case to your game reducer
     case "GAME_WON":
       return {
         ...state,
         gameWon: true,
         gameRunning: false,
         currentScreen: "gameOver",
-        viewingStats: false, // Reset this when game is won
+        viewingStats: false,
+        player: {
+          ...state.player,
+          cash: state.player.cash || 0, // Ensure cash is defined
+        },
         message: "🎉 Congratulations! You've won the game! 🎉",
       };
 
@@ -618,6 +586,7 @@ function gameReducer(state, action) {
         player: {
           ...state.player,
           energy: 100,
+          cash: state.player.cash || 0, // Ensure cash is defined
         },
         message: "You slept and restored your energy!",
       };
@@ -627,36 +596,29 @@ function gameReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          education: Math.min(state.player.education + 5, 100),
-          energy: state.player.energy - 10,
+          education: Math.min((state.player.education || 0) + 5, 100),
+          energy: (state.player.energy || 0) - 10,
+          cash: state.player.cash || 0, // Ensure cash is defined
         },
         message: "You studied and gained 5 education points!",
       };
 
     case "WORK":
-      let salary = state.player.job.salary;
+      let salary = state.player.job?.salary || 0;
       let garnishMessage = "";
-
-      // Check if rent is overdue and apply garnishment
       if (state.player.rental.hasApartment && state.player.rental.rentDue) {
-        // Calculate garnishment amount (e.g., 20% of salary)
         const garnishRate = 0.2;
         const garnishAmount = Math.floor(salary * garnishRate);
-
-        // Reduce salary by garnishment amount
         salary -= garnishAmount;
-
-        // Create garnishment message
         garnishMessage = `\nWages garnished: $${garnishAmount} due to overdue rent.`;
       }
-
       return {
         ...state,
         player: {
           ...state.player,
-          cash: state.player.cash + salary,
-          energy: state.player.energy - 15,
-          experience: Math.min(state.player.experience + 2, 100),
+          cash: (state.player.cash || 0) + salary,
+          energy: (state.player.energy || 0) - 15,
+          experience: Math.min((state.player.experience || 0) + 2, 100),
         },
         message: `You worked and earned $${salary}!${garnishMessage}`,
       };
@@ -667,6 +629,7 @@ function gameReducer(state, action) {
         player: {
           ...state.player,
           job: action.payload.job,
+          cash: state.player.cash || 0, // Ensure cash is defined
         },
         currentScreen: "location",
         message: `Congratulations! You got the job as a ${action.payload.job.title}!`,
@@ -677,8 +640,9 @@ function gameReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          happiness: Math.min(state.player.happiness + 15, 100),
-          energy: state.player.energy - 5,
+          happiness: Math.min((state.player.happiness || 0) + 15, 100),
+          energy: (state.player.energy || 0) - 5,
+          cash: state.player.cash || 0, // Ensure cash is defined
         },
         message: "You relaxed and gained 15 happiness points!",
       };
@@ -689,14 +653,14 @@ function gameReducer(state, action) {
         ...state,
         player: {
           ...state.player,
-          cash: state.player.cash - item.price,
-          possessions: [...state.player.possessions, item.name],
+          cash: (state.player.cash || 0) - item.price,
+          possessions: [...(state.player.possessions || []), item.name],
           energy: item.energy
-            ? Math.min(state.player.energy + item.energy, 100)
-            : state.player.energy,
+            ? Math.min((state.player.energy || 0) + item.energy, 100)
+            : state.player.energy || 0,
           happiness: item.happiness
-            ? Math.min(state.player.happiness + item.happiness, 100)
-            : state.player.happiness,
+            ? Math.min((state.player.happiness || 0) + item.happiness, 100)
+            : state.player.happiness || 0,
         },
         message: `You bought ${item.name} for $${item.price}!`,
       };
@@ -715,16 +679,14 @@ function gameReducer(state, action) {
 
     case "CHECK_GOALS":
       const { player } = state;
-      const goals = player.goals; // Use player-specific goals
+      const goals = player.goals;
       const hasWinningJob =
         player.job && goals.winningJobs.includes(player.job.title);
       const hasLuxuryApartment =
         player.rental &&
         player.rental.hasApartment &&
         player.rental.rentAmount === 200;
-      const hasGoodHealth = player.relationship.health >= 80;
-
-      // Calculate education as the average of subject levels
+      const hasGoodHealth = (player.relationship.health || 0) >= 80;
       const subjectLevels = Object.values(player.subjects);
       const educationAverage = subjectLevels.length
         ? Math.floor(
@@ -739,20 +701,18 @@ function gameReducer(state, action) {
           ([subject, level]) => (player.subjects[subject] || 0) >= level
         );
       });
-
       const achieved =
-        player.cash >= goals.cash &&
+        (player.cash || 0) >= goals.cash &&
         hasWinningJob &&
         hasLuxuryApartment &&
         hasGoodHealth &&
         hasRequiredEducation &&
         hasRequiredSubjects;
-
       const progressDetails = {
         cash: {
-          current: player.cash,
+          current: player.cash || 0,
           target: goals.cash,
-          achieved: player.cash >= goals.cash,
+          achieved: (player.cash || 0) >= goals.cash,
         },
         job: {
           current: player.job?.title || "None",
@@ -767,7 +727,7 @@ function gameReducer(state, action) {
           achieved: hasLuxuryApartment,
         },
         health: {
-          current: player.relationship.health,
+          current: player.relationship.health || 0,
           target: 80,
           achieved: hasGoodHealth,
         },
@@ -784,7 +744,6 @@ function gameReducer(state, action) {
           achieved: hasRequiredSubjects,
         },
       };
-
       if (achieved) {
         return {
           ...state,
@@ -793,9 +752,12 @@ function gameReducer(state, action) {
           currentScreen: "gameOver",
           message:
             "🎉 Congratulations! You've won the game by achieving career success, luxury living, and excellent health! 🎉",
+          player: {
+            ...state.player,
+            cash: state.player.cash || 0, // Ensure cash is defined
+          },
         };
       }
-
       return {
         ...state,
         message: "Here's your progress toward victory!",
@@ -807,7 +769,11 @@ function gameReducer(state, action) {
       return {
         ...initialState,
         isPlayerSelect: true,
-        viewingStats: false, // Make sure this is reset
+        viewingStats: false,
+        player: {
+          ...initialState.player,
+          cash: initialState.player.cash || 0, // Ensure cash is defined
+        },
       };
 
     case "SET_VIEWING_STATS":
@@ -822,17 +788,19 @@ function gameReducer(state, action) {
         id: player.id,
         name: player.name,
         avatar: player.avatar,
-        goals: player.goals, // Use the goals provided by the player
+        goals: player.goals,
         relationship: {
           ...initialState.player.relationship,
           health: 80,
         },
+        cash: initialState.player.cash || 0, // Ensure cash is defined
       }));
-
       if (initializedPlayers.length === 0) {
-        initializedPlayers.push({ ...initialState.player });
+        initializedPlayers.push({
+          ...initialState.player,
+          cash: initialState.player.cash || 0, // Ensure cash is defined
+        });
       }
-
       return {
         ...state,
         isPlayerSelect: false,
@@ -849,11 +817,18 @@ function gameReducer(state, action) {
         state.currentPlayerId === state.totalPlayers
           ? 1
           : state.currentPlayerId + 1;
-
+      const nextPlayer = state.players.find((p) => p.id === nextPlayerId);
+      if (!nextPlayer) {
+        console.error("Next player not found:", nextPlayerId);
+        return state;
+      }
       return {
         ...state,
         currentPlayerId: nextPlayerId,
-        player: state.players.find((p) => p.id === nextPlayerId),
+        player: {
+          ...nextPlayer,
+          cash: nextPlayer.cash || 0, // Ensure cash is defined
+        },
         message: `Player ${nextPlayerId}'s turn!`,
       };
 

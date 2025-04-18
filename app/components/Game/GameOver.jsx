@@ -110,6 +110,22 @@ export default function GameOver({ won }) {
         dispatch({ type: 'RESTART_GAME' });
     };
 
+    // GameOver.jsx
+    if (!player) {
+        return (
+            <div className="game-over flex flex-col items-center justify-center p-6 my-8">
+                <h2 className="text-3xl font-bold mb-6 text-red-400">Error</h2>
+                <p className="text-xl">Player data is missing. Please restart the game.</p>
+                <button
+                    onClick={() => dispatch({ type: 'RESTART_GAME' })}
+                    className="bg-blue-600 hover:bg-blue-500 text-white py-3 px-8 rounded-lg text-xl mt-4"
+                >
+                    Play Again
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div className="game-over flex flex-col items-center justify-center p-6 my-8">
             <h2 className={`text-3xl font-bold mb-6 ${won ? 'text-green-400' : 'text-red-400'}`}>
@@ -181,12 +197,15 @@ export default function GameOver({ won }) {
                 )}
             </div>
 
+
             <button
                 onClick={restartGame}
                 className="bg-blue-600 hover:bg-blue-500 text-white py-3 px-8 rounded-lg text-xl"
             >
                 Play Again
             </button>
+
         </div>
+
     );
 }
