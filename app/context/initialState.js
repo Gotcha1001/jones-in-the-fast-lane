@@ -6,6 +6,14 @@ const initialState = {
     name: "Jones",
     avatar: "👤",
     cash: 200,
+    subjects: {
+      engineering: 0,
+      computerScience: 0,
+      business: 0,
+      liberalArts: 0,
+    },
+    experience: 0,
+
     rental: {
       hasApartment: false,
       lastPaidWeek: null,

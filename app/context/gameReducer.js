@@ -1,5 +1,6 @@
 import { getRandomEvent } from "@/data/randomEvents";
 import initialState from "./initialState";
+import { jobs } from "@/data/jobs";
 
 function gameReducer(state, action) {
   console.log("Action:", action.type, action.payload);
@@ -242,23 +243,55 @@ function gameReducer(state, action) {
 
     // Add this to your existing gameReducer.js file within the switch statement
 
-    case "STUDY_ADVANCED":
-      const hours = action.payload.hours;
-      // Calculate education gain based on current level (better efficiency as you learn)
+    // case "STUDY_ADVANCED":
+    //   const hours = action.payload.hours;
+    //   // Calculate education gain based on current level (better efficiency as you learn)
+    //   const baseGain = 2;
+    //   const efficiency = 1 + state.player.education / 100; // Efficiency increases with education
+    //   const educationGain = Math.floor(baseGain * hours * efficiency);
+
+    //   return {
+    //     ...state,
+    //     player: {
+    //       ...state.player,
+    //       education: Math.min(state.player.education + educationGain, 100),
+    //       energy: state.player.energy - hours * 2, // Each hour costs 2 energy
+    //     },
+    //     message: `You studied for ${hours} hours and gained ${educationGain} education points!`,
+    //   };
+
+    case "STUDY_SUBJECT":
+      const { hours, subject } = action.payload;
       const baseGain = 2;
-      const efficiency = 1 + state.player.education / 100; // Efficiency increases with education
-      const educationGain = Math.floor(baseGain * hours * efficiency);
+      const efficiency = 1 + (state.player.subjects[subject] || 0) / 100;
+      const subjectGain = Math.floor(baseGain * hours * efficiency);
+      const newSubjectLevel = Math.min(
+        (state.player.subjects[subject] || 0) + subjectGain,
+        100
+      );
+
+      // Update subjects
+      const updatedSubjects = {
+        ...state.player.subjects,
+        [subject]: newSubjectLevel,
+      };
+
+      // Calculate education as the average of all subject levels
+      const education = Math.floor(
+        Object.values(updatedSubjects).reduce((sum, level) => sum + level, 0) /
+          Object.keys(updatedSubjects).length
+      );
 
       return {
         ...state,
         player: {
           ...state.player,
-          education: Math.min(state.player.education + educationGain, 100),
-          energy: state.player.energy - hours * 2, // Each hour costs 2 energy
+          subjects: updatedSubjects,
+          education: education, // Update education stat
+          energy: state.player.energy - hours * 2,
         },
-        message: `You studied for ${hours} hours and gained ${educationGain} education points!`,
+        message: `You studied ${subject} for ${hours} hours and gained ${subjectGain} points!`,
       };
-
     // This action is dispatched when the player chooses to do a leisure activity
 
     case "DO_LEISURE_ACTIVITY":
@@ -701,45 +734,44 @@ function gameReducer(state, action) {
 
     case "CHECK_GOALS":
       const { player, goals } = state;
-
-      // Check if player has one of the winning jobs
       const hasWinningJob =
         player.job && goals.winningJobs.includes(player.job.title);
-
-      // Check if player has a luxury apartment
       const hasLuxuryApartment =
         player.rental &&
         player.rental.hasApartment &&
         player.rental.rentAmount === 200;
-
-      // Check if player has sufficient health
       const hasGoodHealth = player.relationship.health >= 80;
 
-      // Modified winning condition: must have career path, luxury apartment AND good health
+      // Calculate education as the average of subject levels
+      const subjectLevels = Object.values(player.subjects);
+      const educationAverage = subjectLevels.length
+        ? Math.floor(
+            subjectLevels.reduce((sum, level) => sum + level, 0) /
+              subjectLevels.length
+          )
+        : 0;
+      const hasRequiredEducation = educationAverage >= goals.education;
+
+      const hasRequiredSubjects = goals.winningJobs.some((jobTitle) => {
+        const job = jobs.find((j) => j.title === jobTitle);
+        return Object.entries(job.requiredSubjects).every(
+          ([subject, level]) => (player.subjects[subject] || 0) >= level
+        );
+      });
+
       const achieved =
         player.cash >= goals.cash &&
-        player.education >= goals.education &&
-        player.happiness >= goals.happiness &&
         hasWinningJob &&
         hasLuxuryApartment &&
-        hasGoodHealth;
+        hasGoodHealth &&
+        hasRequiredEducation &&
+        hasRequiredSubjects;
 
-      // Create detailed progress message
       const progressDetails = {
         cash: {
           current: player.cash,
           target: goals.cash,
           achieved: player.cash >= goals.cash,
-        },
-        education: {
-          current: player.education,
-          target: goals.education,
-          achieved: player.education >= goals.education,
-        },
-        happiness: {
-          current: player.happiness,
-          target: goals.happiness,
-          achieved: player.happiness >= goals.happiness,
         },
         job: {
           current: player.job?.title || "None",
@@ -758,19 +790,19 @@ function gameReducer(state, action) {
           target: 80,
           achieved: hasGoodHealth,
         },
+        education: {
+          current: educationAverage,
+          target: goals.education,
+          achieved: hasRequiredEducation,
+        },
+        subjects: {
+          current: Object.entries(player.subjects).map(
+            ([subject, level]) => `${subject}: ${level}`
+          ),
+          target: "Required subjects for winning job",
+          achieved: hasRequiredSubjects,
+        },
       };
-
-      console.log("Checking goals:", {
-        achieved,
-        cash: `${player.cash}/${goals.cash}`,
-        education: `${player.education}/${goals.education}`,
-        happiness: `${player.happiness}/${goals.happiness}`,
-        job: `${
-          player.job ? player.job.title : "None"
-        }/${goals.winningJobs.join(" or ")}`,
-        luxury: hasLuxuryApartment ? "Yes" : "No",
-        health: `${player.relationship.health}/80`,
-      });
 
       if (achieved) {
         return {
@@ -779,15 +811,15 @@ function gameReducer(state, action) {
           gameRunning: false,
           currentScreen: "gameOver",
           message:
-            "🎉 Congratulations! You've won the game by achieving career success, luxury living, AND excellent health! 🎉",
+            "🎉 Congratulations! You've won the game by achieving career success, luxury living, and excellent health! 🎉",
         };
       }
 
-      // Return progress details in the state temporarily
       return {
         ...state,
         message: "Here's your progress toward victory!",
-        currentScreen: "goals", // Switch to a goals screen
+        currentScreen: "goals",
+        progressDetails,
       };
 
     case "RESTART_GAME":

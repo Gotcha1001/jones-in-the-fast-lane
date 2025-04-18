@@ -510,7 +510,7 @@ export default function LeisureCentre() {
                             }}
                         >
                             <img
-                                src="/leisurelady.jpg"
+                                src="https://img.freepik.com/free-photo/young-girl-two-her-multiracial-male-friends-relaxing-sunbeds-near-swimming-pool_1157-49533.jpg?uid=R194451028&ga=GA1.1.1480099583.1741975489&semt=ais_hybrid&w=740"
                                 alt="Leisure Centre Staff"
                                 className="w-60 h-60 md:w-72 md:h-72 rounded-full border-4 border-purple-500 shadow-xl object-cover object-[center_top]"
                                 onError={(e) => {
@@ -581,8 +581,8 @@ export default function LeisureCentre() {
                             <FeatureMotionWrapper key={activityKey} index={index}>
                                 <div
                                     className={`p-3 rounded-lg cursor-pointer transition-all duration-200 ${selectedActivity === activityKey
-                                            ? 'gradient-background2 border-2 border-purple-500'
-                                            : 'gradient-background2 border-2 border-transparent hover:border-purple-500'
+                                        ? 'gradient-background2 border-2 border-purple-500'
+                                        : 'gradient-background2 border-2 border-transparent hover:border-purple-500'
                                         }`}
                                     onClick={() => handleActivitySelect(activityKey)}
                                 >
@@ -623,8 +623,8 @@ export default function LeisureCentre() {
                             onClick={handleDoActivity}
                             disabled={player.cash < activities[selectedActivity].cost || player.energy < activities[selectedActivity].energy}
                             className={`w-full py-2 px-4 rounded text-white font-medium ${player.cash >= activities[selectedActivity].cost && player.energy >= activities[selectedActivity].energy
-                                    ? 'bg-purple-600 hover:bg-purple-500'
-                                    : 'bg-gray-600 cursor-not-allowed'
+                                ? 'bg-purple-600 hover:bg-purple-500'
+                                : 'bg-gray-600 cursor-not-allowed'
                                 }`}
                         >
                             Do Activity

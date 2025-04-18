@@ -160,9 +160,15 @@ export default function GoalsTracker() {
     const { state, dispatch } = useGame();
     const { player, goals } = state;
 
-    // Calculate progress percentages
+    // Calculate education progress as the average of subject levels
+    const subjectLevels = Object.values(player.subjects);
+    const educationAverage = subjectLevels.length
+        ? Math.floor(subjectLevels.reduce((sum, level) => sum + level, 0) / subjectLevels.length)
+        : 0;
+    const educationProgress = Math.min(100, (educationAverage / goals.education) * 100);
+
+    // Calculate other progress percentages
     const cashProgress = Math.min(100, (player.cash / goals.cash) * 100);
-    const educationProgress = Math.min(100, (player.education / goals.education) * 100);
     const happinessProgress = Math.min(100, (player.happiness / goals.happiness) * 100);
 
     // Check if player has one of the winning jobs
@@ -175,7 +181,7 @@ export default function GoalsTracker() {
     const goBack = () => {
         dispatch({
             type: 'CHANGE_SCREEN',
-            payload: { screen: 'location' }
+            payload: { screen: 'location' },
         });
     };
 
@@ -215,7 +221,7 @@ export default function GoalsTracker() {
                     <div className="flex justify-between mb-1">
                         <span className="text-lg font-medium">Education</span>
                         <span className={`font-medium ${educationProgress >= 100 ? 'text-green-400' : 'text-white'}`}>
-                            {player.education} / {goals.education}
+                            {educationAverage} / {goals.education}
                         </span>
                     </div>
                     <div className="w-full bg-gray-700 rounded h-4">
@@ -327,7 +333,7 @@ export default function GoalsTracker() {
                         </span>
                     </div>
 
-                    {/* Victory conditions - now requires BOTH career AND luxury apartment */}
+                    {/* Victory conditions */}
                     {cashProgress >= 100 && educationProgress >= 100 &&
                         happinessProgress >= 100 && hasWinningJob && hasLuxuryApartment ? (
                         <div className="mt-4 bg-green-900 p-3 rounded text-center">
