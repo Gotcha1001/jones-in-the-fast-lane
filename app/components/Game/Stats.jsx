@@ -293,12 +293,7 @@ export default function Stats() {
         });
     };
 
-    const subjects = [
-        { id: 'computerScience', name: 'Computer Science' },
-        { id: 'engineering', name: 'Engineering' },
-        { id: 'business', name: 'Business Administration' },
-        { id: 'liberalArts', name: 'Liberal Arts' },
-    ];
+
 
     return (
         <div className="bg-black rounded-lg p-4 mb-4">
@@ -313,14 +308,7 @@ export default function Stats() {
                 <div className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded">
                     Cash: ${player.cash.toFixed(2)}
                 </div>
-                {subjects.map((subject) => (
-                    <div
-                        key={subject.id}
-                        className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded"
-                    >
-                        {subject.name}: {(player.subjects[subject.id] || 0)}/100
-                    </div>
-                ))}
+
                 <div className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded">
                     Experience: {player.experience}/100
                 </div>
@@ -354,9 +342,7 @@ export default function Stats() {
                         'Single'
                     )}
                 </div>
-                <div className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded">
-                    Job Goal: {player.goals.winningJobs.join(" or ")}
-                </div>
+
                 <div className="bg-gradient-to-r from-indigo-500 via-black to-purple-900 p-2 rounded">
                     <button
                         onClick={checkGoals}

@@ -713,96 +713,6 @@ function gameReducer(state, action) {
         message: null,
       };
 
-    // case "CHECK_GOALS":
-    //   const { player, goals } = state;
-    //   const hasWinningJob =
-    //     player.job && goals.winningJobs.includes(player.job.title);
-    //   const hasLuxuryApartment =
-    //     player.rental &&
-    //     player.rental.hasApartment &&
-    //     player.rental.rentAmount === 200;
-    //   const hasGoodHealth = player.relationship.health >= 80;
-
-    //   // Calculate education as the average of subject levels
-    //   const subjectLevels = Object.values(player.subjects);
-    //   const educationAverage = subjectLevels.length
-    //     ? Math.floor(
-    //         subjectLevels.reduce((sum, level) => sum + level, 0) /
-    //           subjectLevels.length
-    //       )
-    //     : 0;
-    //   const hasRequiredEducation = educationAverage >= goals.education;
-
-    //   const hasRequiredSubjects = goals.winningJobs.some((jobTitle) => {
-    //     const job = jobs.find((j) => j.title === jobTitle);
-    //     return Object.entries(job.requiredSubjects).every(
-    //       ([subject, level]) => (player.subjects[subject] || 0) >= level
-    //     );
-    //   });
-
-    //   const achieved =
-    //     player.cash >= goals.cash &&
-    //     hasWinningJob &&
-    //     hasLuxuryApartment &&
-    //     hasGoodHealth &&
-    //     hasRequiredEducation &&
-    //     hasRequiredSubjects;
-
-    //   const progressDetails = {
-    //     cash: {
-    //       current: player.cash,
-    //       target: goals.cash,
-    //       achieved: player.cash >= goals.cash,
-    //     },
-    //     job: {
-    //       current: player.job?.title || "None",
-    //       target: goals.winningJobs,
-    //       achieved: hasWinningJob,
-    //     },
-    //     luxury: {
-    //       current:
-    //         player.rental?.rentAmount === 200
-    //           ? "Luxury Apartment"
-    //           : "Not Luxury",
-    //       achieved: hasLuxuryApartment,
-    //     },
-    //     health: {
-    //       current: player.relationship.health,
-    //       target: 80,
-    //       achieved: hasGoodHealth,
-    //     },
-    //     education: {
-    //       current: educationAverage,
-    //       target: goals.education,
-    //       achieved: hasRequiredEducation,
-    //     },
-    //     subjects: {
-    //       current: Object.entries(player.subjects).map(
-    //         ([subject, level]) => `${subject}: ${level}`
-    //       ),
-    //       target: "Required subjects for winning job",
-    //       achieved: hasRequiredSubjects,
-    //     },
-    //   };
-
-    //   if (achieved) {
-    //     return {
-    //       ...state,
-    //       gameWon: true,
-    //       gameRunning: false,
-    //       currentScreen: "gameOver",
-    //       message:
-    //         "🎉 Congratulations! You've won the game by achieving career success, luxury living, and excellent health! 🎉",
-    //     };
-    //   }
-
-    //   return {
-    //     ...state,
-    //     message: "Here's your progress toward victory!",
-    //     currentScreen: "goals",
-    //     progressDetails,
-    //   };
-
     case "CHECK_GOALS":
       const { player } = state;
       const goals = player.goals; // Use player-specific goals
@@ -905,35 +815,6 @@ function gameReducer(state, action) {
         ...state,
         viewingStats: action.payload.viewingStats,
       };
-
-    // case "START_GAME":
-    //   // Make sure players are correctly added to the players array
-    //   const initializedPlayers = action.payload.players.map((player) => ({
-    //     ...initialState.player,
-    //     id: player.id,
-    //     name: player.name,
-    //     avatar: player.avatar,
-    //     relationship: {
-    //       ...initialState.player.relationship,
-    //       health: 80, // Explicitly set health
-    //     },
-    //   }));
-
-    //   if (initializedPlayers.length === 0) {
-    //     // Fallback if no players provided
-    //     initializedPlayers.push({ ...initialState.player });
-    //   }
-
-    //   return {
-    //     ...state,
-    //     isPlayerSelect: false,
-    //     players: initializedPlayers,
-    //     player: initializedPlayers[0], // Make sure player references the first element in players
-    //     currentPlayerId: 1,
-    //     totalPlayers: action.payload.numPlayers,
-    //     gameRunning: true,
-    //     currentScreen: "map",
-    //   };
 
     case "START_GAME":
       const initializedPlayers = action.payload.players.map((player) => ({
