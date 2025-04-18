@@ -17,13 +17,15 @@ import { useGame } from '@/app/context/GameContext';
 
 export default function WinNotification() {
     const { state, dispatch } = useGame();
-    const { gameWon, player } = state;
+    const { gameWon, player, viewingStats } = state;
 
     const handlePlayAgain = () => {
+        console.log("WinNotification: Dispatching RESTART_GAME");
         dispatch({ type: 'RESTART_GAME' });
     };
 
     const handleViewStats = () => {
+        console.log("WinNotification: Dispatching SET_VIEWING_STATS");
         dispatch({ type: 'SET_VIEWING_STATS', payload: { viewingStats: true } });
     };
 
@@ -56,14 +58,19 @@ export default function WinNotification() {
     };
 
     useEffect(() => {
-        if (gameWon && !state.viewingStats) {
+        if (gameWon && !viewingStats) {
+            console.log("WinNotification: Firing confetti for player:", player);
             fireConfetti();
         }
-    }, [gameWon, state.viewingStats]);
+    }, [gameWon, viewingStats]);
 
-    // WinNotification.jsx
-    if (!gameWon || state.viewingStats || !player) return null;
+    // Enhanced guard
+    if (!gameWon || viewingStats || !player || typeof player.week === 'undefined' || typeof player.cash === 'undefined') {
+        console.log("WinNotification: Skipped rendering due to invalid state:", { gameWon, viewingStats, player });
+        return null;
+    }
 
+    console.log("WinNotification: Rendering for player:", player);
 
     return (
         <AlertDialog open={gameWon} onOpenChange={() => { }}>

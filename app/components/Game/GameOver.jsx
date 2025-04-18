@@ -107,15 +107,17 @@ export default function GameOver({ won }) {
     const { player, goals } = state;
 
     const restartGame = () => {
+        console.log("GameOver: Dispatching RESTART_GAME");
         dispatch({ type: 'RESTART_GAME' });
     };
 
-    // GameOver.jsx
-    if (!player) {
+    // Enhanced guard
+    if (!player || typeof player.cash === 'undefined') {
+        console.error("GameOver: Invalid player state:", player);
         return (
             <div className="game-over flex flex-col items-center justify-center p-6 my-8">
                 <h2 className="text-3xl font-bold mb-6 text-red-400">Error</h2>
-                <p className="text-xl">Player data is missing. Please restart the game.</p>
+                <p className="text-xl">Player data is missing or incomplete. Please restart the game.</p>
                 <button
                     onClick={() => dispatch({ type: 'RESTART_GAME' })}
                     className="bg-blue-600 hover:bg-blue-500 text-white py-3 px-8 rounded-lg text-xl mt-4"
@@ -126,12 +128,13 @@ export default function GameOver({ won }) {
         );
     }
 
+    console.log("GameOver: Rendering for player:", player);
+
     return (
         <div className="game-over flex flex-col items-center justify-center p-6 my-8">
             <h2 className={`text-3xl font-bold mb-6 ${won ? 'text-green-400' : 'text-red-400'}`}>
                 {won ? 'Congratulations!' : 'Game Over'}
             </h2>
-
             {won ? (
                 <div className="text-center mb-8">
                     <p className="text-xl">You've achieved all your goals and won the game!</p>
@@ -143,7 +146,6 @@ export default function GameOver({ won }) {
                     <p className="mt-2">Better luck next time.</p>
                 </div>
             )}
-
             <div className="bg-gray-900 p-6 rounded-lg w-full max-w-2xl mb-8">
                 <h3 className="text-xl font-semibold mb-4">Final Stats</h3>
                 <div className="grid grid-cols-2 gap-4">
@@ -181,7 +183,6 @@ export default function GameOver({ won }) {
                     </div>
                 </div>
             </div>
-
             <div className="bg-gray-900 p-6 rounded-lg w-full max-w-2xl mb-8">
                 <h3 className="text-xl font-semibold mb-4">Possessions</h3>
                 {player.possessions.length > 0 ? (
@@ -196,16 +197,12 @@ export default function GameOver({ won }) {
                     <p className="text-gray-400">You didn't acquire any possessions.</p>
                 )}
             </div>
-
-
             <button
                 onClick={restartGame}
                 className="bg-blue-600 hover:bg-blue-500 text-white py-3 px-8 rounded-lg text-xl"
             >
                 Play Again
             </button>
-
         </div>
-
     );
 }

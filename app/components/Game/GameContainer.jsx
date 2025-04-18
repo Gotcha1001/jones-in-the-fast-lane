@@ -163,21 +163,24 @@ export default function GameContainer() {
 
     // Check for win condition on any state change
     useEffect(() => {
-        if (state.gameRunning) {
+        if (!state.gameRunning) return;
+        const timer = setTimeout(() => {
             const { player } = state;
-            const goals = player.goals; // Use player-specific goals
+            if (!player || typeof player.cash === 'undefined') {
+                console.error("GameContainer: Invalid player state:", player);
+                dispatch({
+                    type: 'SET_MESSAGE',
+                    payload: { text: "Error: Player data missing. Please restart." },
+                });
+                return;
+            }
+            const goals = player.goals;
             const hasWinningJob = player.job && goals.winningJobs.includes(player.job.title);
-            const hasLuxuryApartment =
-                player.rental && player.rental.hasApartment && player.rental.rentAmount === 200;
+            const hasLuxuryApartment = player.rental && player.rental.hasApartment && player.rental.rentAmount === 200;
             const hasGoodHealth = player.relationship.health >= 80;
-
-            // Calculate education as the average of subject levels
             const subjectLevels = Object.values(player.subjects);
             const educationAverage = subjectLevels.length
-                ? Math.floor(
-                    subjectLevels.reduce((sum, level) => sum + level, 0) /
-                    subjectLevels.length
-                )
+                ? Math.floor(subjectLevels.reduce((sum, level) => sum + level, 0) / subjectLevels.length)
                 : 0;
             const hasRequiredEducation = educationAverage >= goals.education;
             const hasRequiredSubjects = goals.winningJobs.some((jobTitle) => {
@@ -186,7 +189,6 @@ export default function GameContainer() {
                     ([subject, level]) => (player.subjects[subject] || 0) >= level
                 );
             });
-
             const achieved =
                 player.cash >= goals.cash &&
                 hasWinningJob &&
@@ -194,11 +196,12 @@ export default function GameContainer() {
                 hasGoodHealth &&
                 hasRequiredEducation &&
                 hasRequiredSubjects;
-
             if (achieved && !state.gameWon) {
+                console.log("GameContainer: Dispatching GAME_WON for player:", player);
                 dispatch({ type: 'GAME_WON' });
             }
-        }
+        }, 100);
+        return () => clearTimeout(timer);
     }, [state.player, state.gameRunning, state.gameWon, dispatch]);
 
     // Determine which screen to show based on game state

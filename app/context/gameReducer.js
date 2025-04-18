@@ -426,6 +426,10 @@ function gameReducer(state, action) {
       };
 
     case "USE_TIME":
+      if (state.gameWon) {
+        console.log("USE_TIME blocked: Game is won");
+        return state;
+      }
       if (state.isWalking) {
         console.log("Player is walking, skipping time check");
         return state;
@@ -446,7 +450,7 @@ function gameReducer(state, action) {
             (state.player.happiness || 0) > 50
               ? (state.player.happiness || 0) - 5
               : state.player.happiness || 0,
-          cash: state.player.cash || 0, // Ensure cash is defined
+          cash: state.player.cash || 0,
         };
         let message = "";
         let randomEvent = null;
@@ -515,16 +519,31 @@ function gameReducer(state, action) {
               ? 1
               : state.currentPlayerId + 1;
           const nextPlayer = updatedPlayers.find((p) => p.id === nextPlayerId);
-          if (!nextPlayer) {
-            console.error("Next player not found:", nextPlayerId);
-            return state;
+          if (!nextPlayer || typeof nextPlayer.cash === "undefined") {
+            console.error("Next player not found or invalid:", {
+              nextPlayerId,
+              players: updatedPlayers,
+            });
+            return {
+              ...state,
+              message: "Error: Invalid player data. Please restart the game.",
+              currentScreen: "gameOver",
+              gameRunning: false,
+              player: {
+                ...state.player,
+                cash: state.player.cash || 0,
+              },
+            };
           }
           return {
             ...state,
             isWalking: false,
             players: updatedPlayers,
             currentPlayerId: nextPlayerId,
-            player: nextPlayer,
+            player: {
+              ...nextPlayer,
+              cash: nextPlayer.cash || 0,
+            },
             currentScreen: "map",
             message:
               message ||
@@ -549,7 +568,7 @@ function gameReducer(state, action) {
       const updatedPlayer = {
         ...state.player,
         timeLeft: newTimeLeft,
-        cash: state.player.cash || 0, // Ensure cash is defined
+        cash: state.player.cash || 0,
       };
       const updatedPlayers = state.players.map((p) =>
         p.id === state.currentPlayerId ? updatedPlayer : p
@@ -813,21 +832,37 @@ function gameReducer(state, action) {
       };
 
     case "END_PLAYER_TURN":
+      if (state.gameWon) {
+        console.log("END_PLAYER_TURN blocked: Game is won");
+        return state;
+      }
       const nextPlayerId =
         state.currentPlayerId === state.totalPlayers
           ? 1
           : state.currentPlayerId + 1;
       const nextPlayer = state.players.find((p) => p.id === nextPlayerId);
-      if (!nextPlayer) {
-        console.error("Next player not found:", nextPlayerId);
-        return state;
+      if (!nextPlayer || typeof nextPlayer.cash === "undefined") {
+        console.error("Next player not found or invalid:", {
+          nextPlayerId,
+          players: state.players,
+        });
+        return {
+          ...state,
+          message: "Error: Invalid player data. Please restart the game.",
+          currentScreen: "gameOver",
+          gameRunning: false,
+          player: {
+            ...state.player,
+            cash: state.player.cash || 0,
+          },
+        };
       }
       return {
         ...state,
         currentPlayerId: nextPlayerId,
         player: {
           ...nextPlayer,
-          cash: nextPlayer.cash || 0, // Ensure cash is defined
+          cash: nextPlayer.cash || 0,
         },
         message: `Player ${nextPlayerId}'s turn!`,
       };
