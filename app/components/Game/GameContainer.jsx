@@ -174,6 +174,7 @@ export default function GameContainer() {
                 });
                 return;
             }
+            console.log("GameContainer: Checking win conditions for player:", player);
             const goals = player.goals;
             const hasWinningJob = player.job && goals.winningJobs.includes(player.job.title);
             const hasLuxuryApartment = player.rental && player.rental.hasApartment && player.rental.rentAmount === 200;

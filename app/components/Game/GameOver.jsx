@@ -101,10 +101,15 @@
 
 // components/Game/GameOver.jsx
 import { useGame } from "@/app/context/GameContext";
+import { useEffect } from "react";
 
 export default function GameOver({ won }) {
     const { state, dispatch } = useGame();
     const { player, goals } = state;
+
+    useEffect(() => {
+        console.log("GameOver: State updated:", { player, goals, won });
+    }, [player, goals, won]);
 
     const restartGame = () => {
         console.log("GameOver: Dispatching RESTART_GAME");
@@ -129,6 +134,23 @@ export default function GameOver({ won }) {
     }
 
     console.log("GameOver: Rendering for player:", player);
+
+    // Defensive check for goals
+    if (!goals || typeof goals.cash === 'undefined') {
+        console.error("GameOver: Invalid goals state:", goals);
+        return (
+            <div className="game-over flex flex-col items-center justify-center p-6 my-8">
+                <h2 className="text-3xl font-bold mb-6 text-red-400">Error</h2>
+                <p className="text-xl">Goals data is missing. Please restart the game.</p>
+                <button
+                    onClick={() => dispatch({ type: 'RESTART_GAME' })}
+                    className="bg-blue-600 hover:bg-blue-500 text-white py-3 px-8 rounded-lg text-xl mt-4"
+                >
+                    Play Again
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="game-over flex flex-col items-center justify-center p-6 my-8">
