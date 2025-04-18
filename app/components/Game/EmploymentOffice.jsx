@@ -855,6 +855,17 @@ export default function JobOffice() {
 
     return (
         <div className="employment-office relative mt-4 overflow-hidden">
+            {/* <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-100 min-w-full min-h-full"
+            >
+                <source src="https://videos.pexels.com/video-files/3129785/3129785-sd_640_360_25fps.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+            </video> */}
             <div className="relative z-10 p-4">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold">Employment Office</h2>
