@@ -303,7 +303,7 @@ import Bank from './Bank';
 import SharesMarket from './SharesMarket';
 import LeisureCentre from './LeisureCentre';
 import SaveLoadMenu from './SaveLoadMenu';
-import Workplace from './Workplace';
+
 import University from './University';
 import Apartment from './Apartment';
 import RentalOffice from './RentalOffice';
@@ -313,6 +313,7 @@ import FastFood from './FastFood';
 import DatingOffice from './DatingOffice';
 import HealingCentre from './HealingCentre';
 import { jobs } from '@/data/jobs';
+import Workplace from './WorkPlace';
 
 export default function GameContainer() {
     const { state, dispatch } = useGame();
