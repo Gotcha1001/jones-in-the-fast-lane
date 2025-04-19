@@ -231,10 +231,18 @@ export default function PlayerSelect() {
 
     const avatars = [
         '/avatars/person.jpg',
-        '/avatars/person0.jpg',
-        '/avatars/person1.jpg',
+
+        '/avatars/avatar22.jpg',
+        '/avatars/avatar24.jpg',
+        '/avatars/avatar26.jpg',
+        '/avatars/avatar27.jpg',
+        '/avatars/avatar32.jpg',
+        '/avatars/avatar34.jpg',
+        '/avatars/avatar35.jpg',
+        '/avatars/avatar38.jpg',
+        '/avatars/avatar39.jpg',
         '/avatars/person2.jpg',
-        '/avatars/person3.jpg',
+
         '/avatars/person4.jpg',
         '/avatars/person5.jpg',
         '/avatars/person6.jpg',
@@ -250,6 +258,7 @@ export default function PlayerSelect() {
         '/avatars/sexyguy1.jpg',
         '/avatars/sexyguy2.jpg',
         '/avatars/sexyguy.jpg',
+
     ];
 
     const defaultGoals = {

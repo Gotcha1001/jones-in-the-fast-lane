@@ -8,6 +8,17 @@ function gameReducer(state, action) {
 
   const HANDLE_RANDOM_EVENT = "HANDLE_RANDOM_EVENT";
 
+  console.log("gameReducer: Processing action:", {
+    type: action.type,
+    payload: action.payload,
+    currentState: {
+      player: state.player,
+      players: state.players,
+      gameWon: state.gameWon,
+      currentScreen: state.currentScreen,
+    },
+  });
+
   switch (action.type) {
     case "HANDLE_RANDOM_EVENT":
       const event = action.payload.event;
@@ -206,14 +217,20 @@ function gameReducer(state, action) {
         };
       }
       return state;
-
     case "HYDRATE_STATE":
       return {
         ...action.payload,
         player: {
           ...action.payload.player,
-          cash: action.payload.player.cash || 0, // Ensure cash is defined
+          cash: action.payload.player.cash ?? 200, // Fallback if undefined
+          goals: action.payload.player.goals ?? initialState.player.goals, // Fallback if undefined
         },
+        players:
+          action.payload.players?.map((p) => ({
+            ...p,
+            cash: p.cash ?? 200,
+            goals: p.goals ?? initialState.player.goals,
+          })) || [],
       };
 
     case "SAVE_GAME":
@@ -237,8 +254,15 @@ function gameReducer(state, action) {
         ...savedGame,
         player: {
           ...savedGame.player,
-          cash: savedGame.player.cash || 0, // Ensure cash is defined
+          cash: savedGame.player.cash ?? 200,
+          goals: savedGame.player.goals ?? initialState.player.goals,
         },
+        players:
+          savedGame.players?.map((p) => ({
+            ...p,
+            cash: p.cash ?? 200,
+            goals: p.goals ?? initialState.player.goals,
+          })) || [],
         message: "Game loaded successfully!",
       };
 
@@ -519,7 +543,11 @@ function gameReducer(state, action) {
               ? 1
               : state.currentPlayerId + 1;
           const nextPlayer = updatedPlayers.find((p) => p.id === nextPlayerId);
-          if (!nextPlayer || typeof nextPlayer.cash === "undefined") {
+          if (
+            !nextPlayer ||
+            typeof nextPlayer.cash === "undefined" ||
+            !nextPlayer.goals
+          ) {
             console.error("Next player not found or invalid:", {
               nextPlayerId,
               players: updatedPlayers,
@@ -531,7 +559,8 @@ function gameReducer(state, action) {
               gameRunning: false,
               player: {
                 ...state.player,
-                cash: state.player.cash || 0,
+                cash: state.player.cash ?? 200,
+                goals: state.player.goals ?? initialState.player.goals,
               },
             };
           }
@@ -542,7 +571,8 @@ function gameReducer(state, action) {
             currentPlayerId: nextPlayerId,
             player: {
               ...nextPlayer,
-              cash: nextPlayer.cash || 0,
+              cash: nextPlayer.cash ?? 200,
+              goals: nextPlayer.goals ?? initialState.player.goals,
             },
             currentScreen: "map",
             message:
@@ -585,18 +615,34 @@ function gameReducer(state, action) {
         showRandomEvent: false,
       };
 
+    // case "GAME_WON":
+    //   return {
+    //     ...state,
+    //     gameWon: true,
+    //     gameRunning: false,
+    //     viewingStats: false,
+    //     player: {
+    //       ...state.player,
+    //       cash: state.player.cash ?? 200,
+    //       goals: state.player.goals ?? initialState.player.goals,
+    //     },
+    //     message: "🎉 Congratulations! You've won the game! 🎉",
+    //     // Do NOT set currentScreen to "gameOver" yet
+    //   };
+
     case "GAME_WON":
+      console.log("gameReducer: GAME_WON triggered for player:", state.player);
       return {
         ...state,
         gameWon: true,
         gameRunning: false,
         currentScreen: "gameOver",
-        viewingStats: false,
+        message:
+          "🎉 Congratulations! You've won the game by achieving career success, luxury living, and excellent health! 🎉",
         player: {
           ...state.player,
           cash: state.player.cash || 0, // Ensure cash is defined
         },
-        message: "🎉 Congratulations! You've won the game! 🎉",
       };
 
     case "SLEEP":
@@ -696,6 +742,105 @@ function gameReducer(state, action) {
         message: null,
       };
 
+    // case "CHECK_GOALS":
+    //   const { player } = state;
+    //   const goals = player.goals;
+    //   const hasWinningJob =
+    //     player.job && goals.winningJobs.includes(player.job.title);
+    //   const hasLuxuryApartment =
+    //     player.rental &&
+    //     player.rental.hasApartment &&
+    //     player.rental.rentAmount === 200;
+    //   const hasGoodHealth = (player.relationship.health || 0) >= 80;
+    //   const hasEnoughHappiness = (player.happiness || 0) >= goals.happiness;
+    //   const subjectLevels = Object.values(player.subjects);
+    //   const educationAverage = subjectLevels.length
+    //     ? Math.floor(
+    //         subjectLevels.reduce((sum, level) => sum + level, 0) /
+    //           subjectLevels.length
+    //       )
+    //     : 0;
+    //   const hasRequiredEducation = educationAverage >= goals.education;
+    //   const hasRequiredSubjects = goals.winningJobs.some((jobTitle) => {
+    //     const job = jobs.find((j) => j.title === jobTitle);
+    //     return Object.entries(job.requiredSubjects).every(
+    //       ([subject, level]) => (player.subjects[subject] || 0) >= level
+    //     );
+    //   });
+    //   const achieved =
+    //     (player.cash || 0) >= goals.cash &&
+    //     hasWinningJob &&
+    //     hasLuxuryApartment &&
+    //     hasGoodHealth &&
+    //     hasEnoughHappiness &&
+    //     hasRequiredEducation &&
+    //     hasRequiredSubjects;
+    //   const progressDetails = {
+    //     cash: {
+    //       current: player.cash || 0,
+    //       target: goals.cash,
+    //       achieved: (player.cash || 0) >= goals.cash,
+    //     },
+    //     job: {
+    //       current: player.job?.title || "None",
+    //       target: goals.winningJobs,
+    //       achieved: hasWinningJob,
+    //     },
+    //     luxury: {
+    //       current:
+    //         player.rental?.rentAmount === 200
+    //           ? "Luxury Apartment"
+    //           : "Not Luxury",
+    //       achieved: hasLuxuryApartment,
+    //     },
+    //     health: {
+    //       current: player.relationship.health || 0,
+    //       target: 80,
+    //       achieved: hasGoodHealth,
+    //     },
+    //     happiness: {
+    //       current: player.happiness || 0,
+    //       target: goals.happiness,
+    //       achieved: hasEnoughHappiness,
+    //     },
+    //     education: {
+    //       current: educationAverage,
+    //       target: goals.education,
+    //       achieved: hasRequiredEducation,
+    //     },
+    //     subjects: {
+    //       current: Object.entries(player.subjects).map(
+    //         ([subject, level]) => `${subject}: ${level}`
+    //       ),
+    //       target: "Required subjects for winning job",
+    //       achieved: hasRequiredSubjects,
+    //     },
+    //   };
+    //   console.log("CHECK_GOALS: Win condition check:", {
+    //     achieved,
+    //     progressDetails,
+    //   });
+    //   if (achieved) {
+    //     return {
+    //       ...state,
+    //       gameWon: true,
+    //       gameRunning: false,
+    //       currentScreen: "gameOver",
+    //       message:
+    //         "🎉 Congratulations! You've won the game by achieving career success, luxury living, and excellent health! 🎉",
+    //       player: {
+    //         ...state.player,
+    //         cash: state.player.cash || 0, // Ensure cash is defined
+    //       },
+    //     };
+    //   }
+    //   return {
+    //     ...state,
+    //     message: "Here's your progress toward victory!",
+    //     currentScreen: "goals",
+    //     progressDetails,
+    //   };
+
     case "CHECK_GOALS":
       const { player } = state;
       const goals = player.goals;
@@ -706,6 +851,7 @@ function gameReducer(state, action) {
         player.rental.hasApartment &&
         player.rental.rentAmount === 200;
       const hasGoodHealth = (player.relationship.health || 0) >= 80;
+      const hasEnoughHappiness = (player.happiness || 0) >= goals.happiness;
       const subjectLevels = Object.values(player.subjects);
       const educationAverage = subjectLevels.length
         ? Math.floor(
@@ -725,6 +871,7 @@ function gameReducer(state, action) {
         hasWinningJob &&
         hasLuxuryApartment &&
         hasGoodHealth &&
+        hasEnoughHappiness &&
         hasRequiredEducation &&
         hasRequiredSubjects;
       const progressDetails = {
@@ -750,6 +897,11 @@ function gameReducer(state, action) {
           target: 80,
           achieved: hasGoodHealth,
         },
+        happiness: {
+          current: player.happiness || 0,
+          target: goals.happiness,
+          achieved: hasEnoughHappiness,
+        },
         education: {
           current: educationAverage,
           target: goals.education,
@@ -763,6 +915,10 @@ function gameReducer(state, action) {
           achieved: hasRequiredSubjects,
         },
       };
+      console.log("CHECK_GOALS: Win condition check:", {
+        achieved,
+        progressDetails,
+      });
       if (achieved) {
         return {
           ...state,
@@ -818,6 +974,7 @@ function gameReducer(state, action) {
         initializedPlayers.push({
           ...initialState.player,
           cash: initialState.player.cash || 0, // Ensure cash is defined
+          goals: initialState.player.goals, // Ensure goals is defined
         });
       }
       return {
@@ -841,7 +998,11 @@ function gameReducer(state, action) {
           ? 1
           : state.currentPlayerId + 1;
       const nextPlayer = state.players.find((p) => p.id === nextPlayerId);
-      if (!nextPlayer || typeof nextPlayer.cash === "undefined") {
+      if (
+        !nextPlayer ||
+        typeof nextPlayer.cash === "undefined" ||
+        !nextPlayer.goals
+      ) {
         console.error("Next player not found or invalid:", {
           nextPlayerId,
           players: state.players,
@@ -853,7 +1014,8 @@ function gameReducer(state, action) {
           gameRunning: false,
           player: {
             ...state.player,
-            cash: state.player.cash || 0,
+            cash: state.player.cash ?? 200,
+            goals: state.player.goals ?? initialState.player.goals,
           },
         };
       }
@@ -862,7 +1024,8 @@ function gameReducer(state, action) {
         currentPlayerId: nextPlayerId,
         player: {
           ...nextPlayer,
-          cash: nextPlayer.cash || 0,
+          cash: nextPlayer.cash ?? 200,
+          goals: nextPlayer.goals ?? initialState.player.goals,
         },
         message: `Player ${nextPlayerId}'s turn!`,
       };
