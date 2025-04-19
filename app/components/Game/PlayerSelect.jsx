@@ -230,9 +230,9 @@ export default function PlayerSelect() {
     const [useDefaultGoals, setUseDefaultGoals] = useState(true); // Track if default goals are used
 
     const avatars = [
-        '/avatars/person.jpg',
 
-        '/avatars/avatar22.jpg',
+        '/avatars/avatar30.jpg',
+        '/avatars/avatar25.jpg',
         '/avatars/avatar24.jpg',
         '/avatars/avatar26.jpg',
         '/avatars/avatar27.jpg',
@@ -241,23 +241,35 @@ export default function PlayerSelect() {
         '/avatars/avatar35.jpg',
         '/avatars/avatar38.jpg',
         '/avatars/avatar39.jpg',
-        '/avatars/person2.jpg',
+        '/avatars/avatar28.jpg',
+        '/avatars/avatar21.jpg',
+        '/avatars/avatar 31.jpg',
+        '/avatars/avatar37.jpg',
+        '/avatars/avatar40.jpg',
+        '/avatars/avatar41.jpg',
+        '/avatars/avatar29.jpg',
+        '/avatars/avatar17.jpg',
+        '/avatars/avatar15.jpg',
+        '/avatars/avatar16.jpg',
+        '/avatars/avatar19.jpg',
+        '/avatars/avatar42.jpg',
+        '/avatars/avatar33.jpg',
+        '/avatars/avatar36.jpg',
 
-        '/avatars/person4.jpg',
-        '/avatars/person5.jpg',
-        '/avatars/person6.jpg',
-        '/avatars/person7.jpg',
-        '/avatars/person8.jpg',
-        '/avatars/person9.jpg',
-        '/avatars/person10.jpg',
+        '/avatars/person.jpg',
+
+
         '/avatars/sexygirl.jpg',
         '/avatars/sexygirl1.jpg',
         '/avatars/sexygirl2.jpg',
         '/avatars/sexygirl3.jpg',
         '/avatars/sexygirl4.jpg',
+
         '/avatars/sexyguy1.jpg',
         '/avatars/sexyguy2.jpg',
         '/avatars/sexyguy.jpg',
+        '/avatars/sexyguy3.jpg',
+        '/avatars/sexyguy4.jpg',
 
     ];
 
