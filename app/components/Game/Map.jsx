@@ -1,11 +1,12 @@
-// Map.jsx
+
+
+
 import { useGame } from '@/app/context/GameContext';
 import { initAudio, loadWalkingSound, playWalkingSound, stopWalkingSound } from '@/data/audioManager';
 import { locations } from '@/data/locations';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import PathSystem from './PathSystem';
-
 
 export default function Map() {
     const { state, dispatch } = useGame();
@@ -16,12 +17,65 @@ export default function Map() {
     const [pathSegments, setPathSegments] = useState([]);
     const [overallProgress, setOverallProgress] = useState(0);
     const [isMobile, setIsMobile] = useState(false);
+    const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
+    const mapRef = useRef(null);
+    const [overlappingMarkers, setOverlappingMarkers] = useState(new Set());
 
+    // Track map container size for dynamic calculations
     useEffect(() => {
-        initAudio();
-        loadWalkingSound('/sounds/walk.mp3'); // adjust the path if needed
+        const updateDimensions = () => {
+            if (mapRef.current) {
+                const { width, height } = mapRef.current.getBoundingClientRect();
+                setMapDimensions({ width, height });
+            }
+        };
+
+        updateDimensions();
+        window.addEventListener('resize', updateDimensions);
+        return () => window.removeEventListener('resize', updateDimensions);
     }, []);
 
+    // Check if screen is mobile size (<768px)
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    // Calculate dynamic marker size for location markers
+    // Adjust these values to change location marker sizes
+    const getMarkerSize = () => {
+        if (isMobile) {
+            return { width: 16, height: 16 }; // Mobile: ~64px at 400px, ~96px at 600px
+        } else if (window.innerWidth < 1024) {
+            return { width: 12, height: 12 }; // Mid-screens: ~108px at 900px
+        } else {
+            return { width: 10, height: 10 }; // Desktop: ~120px at 1200px, ~192px at 1920px
+        }
+    };
+
+    // Calculate dynamic center avatar size
+    // Adjust these values to change center avatar sizes
+    const getCenterAvatarSize = () => {
+        if (isMobile) {
+            return 'h-52 w-36'; // Mobile: ~520x360px at 400px
+        } else if (window.innerWidth < 1024) {
+            return 'h-72 w-48'; // Mid-screens: ~720x480px at 900px
+        } else {
+            return 'h-[48vh] w-72'; // Desktop: ~518x720px at 1080p
+        }
+    };
+
+    // Initialize audio and load walking sound
+    useEffect(() => {
+        initAudio();
+        loadWalkingSound('/sounds/walk.mp3');
+    }, []);
+
+    // Play/stop walking sound based on isWalking state
     useEffect(() => {
         if (isWalking) {
             playWalkingSound();
@@ -30,56 +84,103 @@ export default function Map() {
         }
     }, [isWalking]);
 
-    // Check if screen is mobile size
-    useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
-        // Initial check
-        checkMobile();
-        // Add event listener
-        window.addEventListener('resize', checkMobile);
-        // Clean up
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
-
-
-    // Use the mapX and mapY directly from locations object
+    // Calculate location positions with minimum spacing to prevent overlaps
     const locationPositions = useMemo(() => {
         const positions = {};
         Object.entries(locations).forEach(([id, location]) => {
             positions[id] = {
                 x: location.mapX,
-                y: location.mapY
+                y: location.mapY,
             };
         });
-        return positions;
-    }, []);
 
-    // Path network moved to PathSystem component
+        // Adjust positions to enforce minimum spacing
+        const adjustedPositions = { ...positions };
+        const minDistance = isMobile ? 12 : 18; // Minimum distance in % units
+        const locationKeys = Object.keys(positions);
+
+        for (let i = 0; i < locationKeys.length; i++) {
+            for (let j = i + 1; j < locationKeys.length; j++) {
+                const id1 = locationKeys[i];
+                const id2 = locationKeys[j];
+                const pos1 = adjustedPositions[id1];
+                const pos2 = adjustedPositions[id2];
+
+                const distance = Math.sqrt(
+                    Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2)
+                );
+
+                if (distance < minDistance && distance > 0) {
+                    const angle = Math.atan2(pos2.y - pos1.y, pos2.x - pos1.x);
+                    const offset = (minDistance - distance) / 2;
+
+                    adjustedPositions[id1] = {
+                        x: pos1.x - Math.cos(angle) * offset,
+                        y: pos1.y - Math.sin(angle) * offset,
+                    };
+                    adjustedPositions[id2] = {
+                        x: pos2.x + Math.cos(angle) * offset,
+                        y: pos2.y + Math.sin(angle) * offset,
+                    };
+                }
+            }
+        }
+
+        return adjustedPositions;
+    }, [isMobile]);
+
+    // Detect overlapping markers for opacity adjustment
+    useEffect(() => {
+        const overlaps = new Set();
+        const locationKeys = Object.keys(locationPositions);
+        const { width: markerSize } = getMarkerSize();
+        const minPixelDistance = (markerSize / 100) * mapDimensions.width * 1.8;
+
+        for (let i = 0; i < locationKeys.length; i++) {
+            for (let j = i + 1; j < locationKeys.length; j++) {
+                const id1 = locationKeys[i];
+                const id2 = locationKeys[j];
+                const pos1 = locationPositions[id1];
+                const pos2 = locationPositions[id2];
+
+                const pixelX1 = (pos1.x / 100) * mapDimensions.width;
+                const pixelY1 = (pos1.y / 100) * mapDimensions.height;
+                const pixelX2 = (pos2.x / 100) * mapDimensions.width;
+                const pixelY2 = (pos2.y / 100) * mapDimensions.height;
+
+                const distance = Math.sqrt(
+                    Math.pow(pixelX1 - pixelX2, 2) + Math.pow(pixelY1 - pixelY2, 2)
+                );
+
+                if (distance < minPixelDistance) {
+                    overlaps.add(id1);
+                    overlaps.add(id2);
+                }
+            }
+        }
+
+        setOverlappingMarkers(overlaps);
+    }, [locationPositions, mapDimensions, isMobile]);
+
+    // Define path network for movement animations
     const pathNetwork = useMemo(() => {
-        // Define key path points (main circuit) - in percentages now
         const mainPath = [
-            { x: 15, y: 15 },  // Top left
-            { x: 50, y: 10 },  // Top middle
-            { x: 85, y: 15 },  // Top right
-            { x: 90, y: 50 },  // Right middle
-            { x: 85, y: 85 },  // Bottom right
-            { x: 50, y: 90 },  // Bottom middle
-            { x: 15, y: 85 },  // Bottom left
-            { x: 10, y: 50 },  // Left middle
-            { x: 15, y: 15 },  // Back to top left
+            { x: 15, y: 15 },
+            { x: 50, y: 10 },
+            { x: 85, y: 15 },
+            { x: 90, y: 50 },
+            { x: 85, y: 85 },
+            { x: 50, y: 90 },
+            { x: 15, y: 85 },
+            { x: 10, y: 50 },
+            { x: 15, y: 15 },
         ];
 
-        // Create a network structure
         const network = {};
         const locationKeys = Object.keys(locations);
 
-        // Connect each location to the nearest path point
         locationKeys.forEach(id => {
             const pos = locationPositions[id];
-
-            // Find the closest path point
             let closestPoint = null;
             let minDistance = Infinity;
 
@@ -88,61 +189,47 @@ export default function Map() {
                     Math.pow(pos.x - point.x, 2) +
                     Math.pow(pos.y - point.y, 2)
                 );
-
                 if (distance < minDistance) {
                     minDistance = distance;
                     closestPoint = point;
                 }
             });
 
-            // Create a direct path from location to closest point
             network[id] = {
                 mainPathConnection: closestPoint,
                 directConnections: {}
             };
         });
 
-        // For each pair of locations, determine the path between them
         locationKeys.forEach(fromId => {
             locationKeys.forEach(toId => {
                 if (fromId !== toId) {
                     const from = locationPositions[fromId];
                     const to = locationPositions[toId];
-
-                    // Get the main path connections
                     const fromMainPoint = network[fromId].mainPathConnection;
                     const toMainPoint = network[toId].mainPathConnection;
 
-                    // Find the indices of these points in the main path
                     const fromIndex = mainPath.findIndex(p =>
                         p.x === fromMainPoint.x && p.y === fromMainPoint.y);
                     const toIndex = mainPath.findIndex(p =>
                         p.x === toMainPoint.x && p.y === toMainPoint.y);
 
-                    // Create the complete path
                     let pathPoints = [];
-
-                    // Add the starting location
                     pathPoints.push({ x: from.x, y: from.y });
-
-                    // Add the connection to the main path
                     pathPoints.push({ x: fromMainPoint.x, y: fromMainPoint.y });
 
-                    // Determine the direction to go around the main path
                     const clockwise = (toIndex > fromIndex &&
                         toIndex - fromIndex <= mainPath.length / 2) ||
                         (fromIndex > toIndex &&
                             fromIndex - toIndex > mainPath.length / 2);
 
                     if (clockwise) {
-                        // Go clockwise
                         let i = fromIndex;
                         while (i !== toIndex) {
-                            i = (i + 1) % (mainPath.length - 1); // -1 because the last point is the same as first
+                            i = (i + 1) % (mainPath.length - 1);
                             pathPoints.push({ x: mainPath[i].x, y: mainPath[i].y });
                         }
                     } else {
-                        // Go counter-clockwise
                         let i = fromIndex;
                         while (i !== toIndex) {
                             i = (i - 1 + (mainPath.length - 1)) % (mainPath.length - 1);
@@ -150,10 +237,7 @@ export default function Map() {
                         }
                     }
 
-                    // Add the connection from the main path to the destination
                     pathPoints.push({ x: to.x, y: to.y });
-
-                    // Store the path
                     network[fromId].directConnections[toId] = pathPoints;
                 }
             });
@@ -170,11 +254,10 @@ export default function Map() {
     // Handle walking animation along the path
     useEffect(() => {
         if (isWalking && targetLocation) {
-            // Get the path from current location to target
             const path = pathNetwork[player.location].directConnections[targetLocation];
             setPathSegments(path);
             const totalSegments = path.length - 1;
-            const duration = 5000; // 5 seconds total animation time
+            const duration = 5000;
             let startTime = null;
             let animationId = null;
 
@@ -182,14 +265,9 @@ export default function Map() {
                 if (!startTime) startTime = timestamp;
                 const elapsed = timestamp - startTime;
                 const rawProgress = Math.min(elapsed / duration, 1);
-
-                // Use easing for smoother animation
                 const smoothProgress = easeInOutQuad(rawProgress);
 
-                // Set overall progress for center avatar animation
                 setOverallProgress(smoothProgress);
-
-                // Determine which segment we're on
                 const segmentProgress = smoothProgress * totalSegments;
                 const currentSegment = Math.min(Math.floor(segmentProgress), totalSegments - 1);
                 const segmentSpecificProgress = segmentProgress - currentSegment;
@@ -204,7 +282,6 @@ export default function Map() {
 
             animationId = requestAnimationFrame(animate);
 
-            // Clean up animation when component unmounts or animation changes
             return () => {
                 if (animationId) {
                     cancelAnimationFrame(animationId);
@@ -217,24 +294,15 @@ export default function Map() {
         }
     }, [isWalking, targetLocation, player.location, pathNetwork]);
 
-    //FUNCTION TO END TURN IF TIME IS TOO LESS/++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-    // Add this function to your Map component
+    // Check time and end turn if needed
     const checkTimeAndEndTurnIfNeeded = () => {
-        const minimumTimeForTravel = 5; // The time needed to travel anywhere
-
+        const minimumTimeForTravel = 5;
         if (player.timeLeft < minimumTimeForTravel && !isWalking) {
-            // Show message
             dispatch({
                 type: 'SET_MESSAGE',
                 payload: { text: "Not enough time left to travel. Your turn is ending..." }
             });
-
-            // Wait 2 seconds, then end the turn
             setTimeout(() => {
-                // This will use up all remaining time and trigger week change/next player
                 dispatch({
                     type: 'USE_TIME',
                     payload: { amount: player.timeLeft }
@@ -245,13 +313,11 @@ export default function Map() {
 
     const walkToLocation = (locationId) => {
         if (isWalking || locationId === player.location) return;
-
         const travelTime = 5;
         if (player.timeLeft <= 0) {
             dispatch({ type: 'SET_MESSAGE', payload: { text: "You've run out of time for this week!" } });
             return;
         }
-
         if (player.timeLeft < travelTime) {
             dispatch({ type: 'SET_MESSAGE', payload: { text: "Not enough time to travel there." } });
             return;
@@ -259,18 +325,14 @@ export default function Map() {
 
         setTargetLocation(locationId);
         dispatch({ type: 'MOVE_TO_LOCATION', payload: { locationId } });
-
         setTimeout(() => {
             dispatch({ type: 'COMPLETE_MOVE', payload: { locationId } });
             dispatch({ type: 'USE_TIME', payload: { amount: travelTime } });
             setTargetLocation(null);
-
-            // Add this check after the move is complete
             checkTimeAndEndTurnIfNeeded();
         }, 5000);
     };
 
-    // Add this useEffect to check time whenever relevant values change
     useEffect(() => {
         if (!isWalking) {
             checkTimeAndEndTurnIfNeeded();
@@ -280,8 +342,6 @@ export default function Map() {
     const enterLocation = (locationId) => {
         dispatch({ type: 'CHANGE_SCREEN', payload: { screen: 'location' } });
     };
-
-    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     // Get the current animated position along the path
     const getAnimatedPosition = () => {
@@ -297,19 +357,11 @@ export default function Map() {
         };
     };
 
-    // Calculate center avatar animation during walk - with continuous visibility
+    // Calculate center avatar animation during walk
     const getCenterAvatarStyles = () => {
         if (!isWalking) return {};
-
-        // During first half, center avatar grows and spins
-        // During second half, it stays at same size
-        const scale = overallProgress < 0.3
-            ? 1 + (overallProgress * 0.25) // Scale up to 1.25x in first 30%
-            : 1.25; // Stay at 1.25x scale
-
-        // Add opacity transition for a smooth fade effect in the later stages
+        const scale = overallProgress < 0.3 ? 1 + (overallProgress * 0.25) : 1.25;
         const opacity = overallProgress > 0.7 ? 1 - ((overallProgress - 0.7) / 0.3) : 1;
-
         return {
             transform: `scale(${scale})`,
             opacity: opacity
@@ -319,8 +371,10 @@ export default function Map() {
     return (
         <div className="mt-4">
             <h3 className="text-lg font-bold mb-3">City Map</h3>
+            {/* Map Container: Adjust height/width here */}
             <div
-                className="map-background w-full h-[60vh] sm:h-[80vh] lg:h-[120vh] relative bg-gray-900 rounded-lg overflow-hidden shadow-xl px-4 sm:px-8"
+                ref={mapRef}
+                className="map-background w-full h-[70vh] sm:h-[90vh] lg:h-[120vh] max-h-[1800px] max-w-[1800px] mx-auto relative bg-gray-900 rounded-lg overflow-hidden shadow-xl px-4 sm:px-8"
                 style={{
                     backgroundImage: "url('/logo1.jpg')",
                     backgroundRepeat: "no-repeat",
@@ -328,8 +382,7 @@ export default function Map() {
                     backgroundPosition: "center",
                 }}
             >
-
-                {/* Background path image */}
+                {/* Stone Path Image: Adjust size/scaling here */}
                 <img
                     src="/stone2.png"
                     alt="Stone Path"
@@ -337,14 +390,14 @@ export default function Map() {
                     style={{
                         top: '50%',
                         left: '50%',
-                        width: isMobile ? '90%' : '70%',
-                        height: isMobile ? '90%' : '70%',
-                        objectFit: 'contain',
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
                         transform: 'translate(-50%, -50%)',
                     }}
                 />
 
-                {/* PathSystem component */}
+                {/* Path System: Handles movement paths */}
                 <PathSystem
                     locationPositions={locationPositions}
                     player={player}
@@ -353,7 +406,7 @@ export default function Map() {
                     isMobile={isMobile}
                 />
 
-                {/* Avatar walking animation - always visible */}
+                {/* Walking Avatar: Displayed during movement animation */}
                 {isWalking && getAnimatedPosition() && (
                     <div
                         className="absolute z-30 transition-transform duration-300 ease-in-out"
@@ -363,12 +416,13 @@ export default function Map() {
                             transform: 'translate(-50%, -50%)'
                         }}
                     >
-                        <div className={`${isMobile ? 'h-12 w-12' : 'h-20 w-20'} bg-blue-600 rounded-full flex items-center justify-center shadow-lg relative`}>
+                        {/* Adjust walking avatar size here */}
+                        <div className={`${isMobile ? 'h-12 w-12' : 'h-16 w-16'} bg-blue-600 rounded-full flex items-center justify-center shadow-lg relative`}>
                             <div className="absolute inset-0 rounded-full border-2 border-yellow-400 z-20"></div>
                             <img
                                 src={player.avatar}
                                 alt={player.name}
-                                className={`${isMobile ? 'h-10 w-10' : 'h-18 w-18'} rounded-full z-10`}
+                                className={`${isMobile ? 'h-10 w-10' : 'h-14 w-14'} rounded-full z-10`}
                             />
                         </div>
                         <div className="mt-1 bg-black px-2 py-1 rounded text-xs text-center shadow-md">
@@ -377,7 +431,7 @@ export default function Map() {
                     </div>
                 )}
 
-                {/* Static player position when not walking */}
+                {/* Static Player Avatar: Displayed at current location when not walking */}
                 {!isWalking && player.location && (
                     <div
                         className="absolute z-30"
@@ -387,6 +441,7 @@ export default function Map() {
                             transform: 'translate(-50%, -50%)'
                         }}
                     >
+                        {/* Adjust static player avatar size here */}
                         <div className={`${isMobile ? 'h-16 w-16' : 'h-20 w-20'} rounded-full flex items-center justify-center shadow-lg relative`}>
                             <div className="absolute inset-0 rounded-full border-4 border-yellow-400 animate-pulse z-20"></div>
                             <div className={`${isMobile ? 'h-14 w-14' : 'h-18 w-18'} bg-indigo-600 rounded-full flex items-center justify-center z-10 m-1`}>
@@ -403,11 +458,11 @@ export default function Map() {
                     </div>
                 )}
 
-                {/* Center avatar display - always visible throughout animation */}
+                {/* Center Avatar: Main player avatar in map center */}
                 <div
                     className="absolute top-1/2 left-1/2 z-20 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-500"
                     style={{
-                        opacity: isWalking && overallProgress > 0.95 ? 0 : 1, // Only fade out completely at the very end
+                        opacity: isWalking && overallProgress > 0.95 ? 0 : 1,
                         pointerEvents: isWalking ? 'none' : 'auto'
                     }}
                 >
@@ -415,10 +470,11 @@ export default function Map() {
                         className={`transition-all duration-500 ${isWalking ? 'animate-spin-slow' : ''}`}
                         style={getCenterAvatarStyles()}
                     >
+                        {/* Adjust center avatar size here */}
                         <img
                             src={player.avatar}
                             alt={player.name}
-                            className={`${isMobile ? 'h-40 w-32' : 'h-72 w-48'} rounded-lg border-4 border-yellow-400 shadow-2xl`}
+                            className={`${getCenterAvatarSize()} rounded-lg border-4 border-yellow-400 shadow-2xl`}
                         />
                         <div className="text-center mt-2 text-white font-semibold bg-gradient-to-r from-indigo-500 via-purple-900 to-black px-3 py-1 rounded">
                             {player.name}
@@ -426,7 +482,7 @@ export default function Map() {
                     </div>
                 </div>
 
-                {/* Destination highlight effect - appears at destination during walk */}
+                {/* Destination Highlight: Effect shown at target location during walking */}
                 {isWalking && targetLocation && (
                     <div
                         className="absolute z-20"
@@ -436,16 +492,18 @@ export default function Map() {
                             transform: 'translate(-50%, -50%)'
                         }}
                     >
+                        {/* Adjust destination highlight size here */}
                         <div className={`${isMobile ? 'h-20 w-20' : 'h-24 w-24'} rounded-full animate-ping bg-yellow-400/30 absolute`}></div>
                         <div className={`${isMobile ? 'h-16 w-16' : 'h-20 w-20'} rounded-full animate-ping bg-yellow-400/50 absolute inset-1`}></div>
                     </div>
                 )}
 
-                {/* Locations */}
+                {/* Location Markers: Circular markers for each location */}
                 {Object.entries(locations).map(([id, location]) => {
                     const pos = locationPositions[id];
                     const isCurrent = player.location === id;
                     const isTarget = targetLocation === id;
+                    const { width, height } = getMarkerSize();
 
                     return (
                         <div
@@ -455,36 +513,55 @@ export default function Map() {
                                 left: `${pos.x}%`,
                                 top: `${pos.y}%`,
                                 transform: 'translate(-50%, -50%)',
-                                zIndex: 10
+                                zIndex: isCurrent || isTarget ? 15 : overlappingMarkers.has(id) ? 8 : 10,
                             }}
-                            onClick={() => isCurrent ? enterLocation(id) : walkToLocation(id)}
+                            onClick={() => (isCurrent ? enterLocation(id) : walkToLocation(id))}
                         >
+                            {/* Adjust location marker size in getMarkerSize() function */}
                             <motion.div
-                                className={`location-marker relative ${isCurrent ? 'bg-green-500' : isTarget ? 'bg-amber-500' : 'bg-indigo-500'}
-                                ${isMobile ? 'h-16 w-16 md:h-24 md:w-24' : 'h-24 w-24 md:h-40 md:w-40'} rounded-full flex items-center justify-center cursor-pointer shadow-lg`}
+                                className={`location-marker relative ${isCurrent ? 'bg-green-500' : isTarget ? 'bg-amber-500' : 'bg-indigo-500'} rounded-full flex items-center justify-center cursor-pointer shadow-lg`}
+                                style={{
+                                    width: `${width}vw`,
+                                    height: `${height}vw`,
+                                    opacity: overlappingMarkers.has(id) && !isCurrent && !isTarget ? 0.7 : 1,
+                                }}
                                 whileHover={{
                                     scale: 1.1,
-                                    transition: { duration: 0.2 }
+                                    opacity: 1,
+                                    zIndex: 20,
+                                    transition: { duration: 0.2 },
                                 }}
                                 whileTap={{
-                                    scale: 0.95
+                                    scale: 0.95,
                                 }}
+                                role="button"
+                                aria-label={`${isCurrent ? 'Enter' : 'Travel to'} ${location.name}`}
                             >
-                                <div className={`absolute inset-0 rounded-full ${isCurrent ? 'border-yellow-400 border-4' : isTarget ? 'border-amber-300 border-4' : 'border-white border-2'}`}></div>
+                                <div
+                                    className={`absolute inset-0 rounded-full ${isCurrent ? 'border-yellow-400 border-4' : isTarget ? 'border-amber-300 border-4' : 'border-white border-2'}`}
+                                ></div>
                                 <img
                                     src={location.image}
                                     alt={location.name}
-                                    className={`${isMobile ? 'h-14 w-14 md:h-22 md:w-22' : 'h-22 w-22 md:h-36 md:w-36'} rounded-full z-10`}
+                                    className="rounded-full z-10"
+                                    style={{
+                                        width: `calc(${width}vw - 0.5rem)`,
+                                        height: `calc(${height}vw - 0.5rem)`,
+                                    }}
                                 />
                             </motion.div>
-                            <div className="mt-1 gradient-background2 px-1 md:py-1  rounded text-xs md:text-sm text-center shadow-md">
+                            <div
+                                className="mt-2 gradient-background2 px-1 py-1 rounded text-xs sm:text-sm text-center shadow-md"
+                                style={{
+                                    transform: pos.y > 80 ? 'translateY(-0.5rem)' : 'none', // Offset for bottom locations
+                                }}
+                            >
                                 {location.name}
                             </div>
-
                         </div>
                     );
                 })}
-            </div> {/* This closes map container */}
+            </div>
         </div>
     );
 }
