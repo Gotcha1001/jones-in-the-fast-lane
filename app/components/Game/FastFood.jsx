@@ -368,14 +368,23 @@
 
 
 import { useGame } from '@/app/context/GameContext';
-import { initAudio, loadFastFoodMusic, playFastFoodMusic, stopFastFoodMusic } from '@/data/audioManager';
+import { initAudio, loadClickSound, loadFastFoodMusic, playClickSound, playFastFoodMusic, stopFastFoodMusic } from '@/data/audioManager';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner'; // Add this import
+import FeatureMotionWrapper from '../FramerMotion/FeatureMotionWrapperMap';
 
 export default function FastFood() {
     const { state, dispatch } = useGame();
     const { player } = state;
     const [selectedMeal, setSelectedMeal] = useState(null);
+
+
+    const withSound = (handler) => (event) => {
+        playClickSound()
+        if (handler) {
+            handler(event)
+        }
+    }
 
     // Define meals available
     const meals = [
@@ -399,6 +408,11 @@ export default function FastFood() {
     useEffect(() => {
         // Initialize audio and load fast food music
         initAudio();
+        loadClickSound('/sounds/click.mp3').then((success) => {
+            if (!success) {
+                console.warn("Cant Load Click Sound")
+            }
+        })
         loadFastFoodMusic('/sounds/fastfood.mp3').then(() => {
             playFastFoodMusic();
         });
@@ -469,7 +483,7 @@ export default function FastFood() {
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold">Python Burgers</h2>
                     <button
-                        onClick={goBackToLocation}
+                        onClick={withSound(goBackToLocation)}
                         className="bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded"
                     >
                         Back
@@ -526,27 +540,31 @@ export default function FastFood() {
                 <div className="bg-gradient-to-bl from-yellow-500 via-black to-orange-900 p-4 rounded mb-4">
                     <h3 className="text-lg font-semibold mb-2">Today's Menu</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {meals.map(meal => (
-                            <div
-                                key={meal.id}
-                                className="gradient-background2 p-3 rounded-lg border-2 border-transparent hover:border-yellow-500 cursor-pointer transition-all"
-                                onClick={() => handleBuyMeal(meal)}
-                            >
-                                <div className="flex justify-between items-center">
-                                    <h4 className="font-medium text-white">{meal.name}</h4>
-                                    <span className="text-green-400">${meal.price}</span>
-                                </div>
-                                <div className="mt-2 text-sm text-gray-300">
-                                    <div>Energy: +{meal.energy}</div>
-                                    <div>Happiness: +{meal.happiness}</div>
-                                </div>
-                                <button
-                                    className="mt-2 w-full bg-yellow-600 hover:bg-yellow-500 text-white py-1 px-4 rounded text-sm"
-                                    disabled={player.cash < meal.price}
+                        {meals.map((meal, index) => (
+                            <FeatureMotionWrapper index={index} key={index}>
+
+                                <div
+
+                                    className="gradient-background2 p-3 rounded-lg border-2 border-transparent hover:border-yellow-500 cursor-pointer transition-all"
+                                    onClick={withSound(() => handleBuyMeal(meal))}
                                 >
-                                    {player.cash >= meal.price ? 'Order Now' : 'Not Enough Cash'}
-                                </button>
-                            </div>
+                                    <div className="flex justify-between items-center">
+                                        <h4 className="font-medium text-white">{meal.name}</h4>
+                                        <span className="text-green-400">${meal.price}</span>
+                                    </div>
+                                    <div className="mt-2 text-sm text-gray-300">
+                                        <div>Energy: +{meal.energy}</div>
+                                        <div>Happiness: +{meal.happiness}</div>
+                                    </div>
+                                    <button
+                                        className="mt-2 w-full bg-yellow-600 hover:bg-yellow-500 text-white py-1 px-4 rounded text-sm"
+                                        disabled={player.cash < meal.price}
+                                    >
+                                        {player.cash >= meal.price ? 'Order Now' : 'Not Enough Cash'}
+                                    </button>
+                                </div>
+                            </FeatureMotionWrapper>
+
                         ))}
                     </div>
                 </div>

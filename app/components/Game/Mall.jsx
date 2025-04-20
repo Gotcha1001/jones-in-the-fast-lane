@@ -128,7 +128,7 @@
 // components/Locations/Mall.jsx
 
 import { useGame } from "@/app/context/GameContext";
-import { initAudio, loadMallMusic, playMallMusic, stopMallMusic } from "@/data/audioManager";
+import { initAudio, loadClickSound, loadMallMusic, playClickSound, playMallMusic, stopMallMusic } from "@/data/audioManager";
 import { shopItems } from "@/data/items";
 import { useEffect } from "react";
 import FeatureMotionWrapper from "../FramerMotion/FeatureMotionWrapperMap";
@@ -138,10 +138,23 @@ export default function ShoppingMall() {
     const { state, dispatch } = useGame();
     const { player } = state;
 
+
+    const withSound = (handler) => (event) => {
+        playClickSound()
+        if (handler) {
+            handler(event)
+        }
+    }
+
     // Add useEffect to handle mall music
     useEffect(() => {
         // Initialize audio and load mall music
         initAudio();
+        loadClickSound('/sounds/click.mp3').then((success) => {
+            if (!success) {
+                console.warn("Failed to load click sound")
+            }
+        })
         loadMallMusic('/sounds/mallmusic.mp3').then(() => {
             playMallMusic();
         });
@@ -201,7 +214,7 @@ export default function ShoppingMall() {
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold">Shopping Mall</h2>
                     <button
-                        onClick={goBackToLocation}
+                        onClick={withSound(goBackToLocation)}
                         className="bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded"
                     >
                         Back
@@ -287,7 +300,7 @@ export default function ShoppingMall() {
                                         </div>
 
                                         <button
-                                            onClick={() => buyItem(item)}
+                                            onClick={withSound(() => buyItem(item))}
                                             disabled={alreadyOwns || !canAfford}
                                             className={`mt-2 w-full py-2 rounded-lg ${alreadyOwns
                                                 ? 'bg-green-800 text-green-300 cursor-not-allowed'

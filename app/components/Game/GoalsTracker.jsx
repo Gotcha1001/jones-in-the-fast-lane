@@ -371,12 +371,30 @@
 
 
 // components/Game/GoalsTracker.jsx
+"use client"
 import { useGame } from '@/app/context/GameContext';
+import { loadClickSound, playClickSound } from '@/data/audioManager';
 import { useEffect } from 'react';
 
 export default function GoalsTracker() {
     const { state, dispatch } = useGame();
     const { player } = state;
+
+    const withSound = (handler) => (event) => {
+        playClickSound()
+        if (handler) {
+            handler(event)
+        }
+    }
+
+    useEffect(() => {
+        loadClickSound('/sounds/click.mp3').then((success) => {
+            if (!success) {
+                console.warn("Cant Load Click Sound")
+            }
+        })
+    }, [])
+
     const goals = player.goals; // Use player-specific goals
 
     // Calculate education progress as the average of subject levels
@@ -409,7 +427,7 @@ export default function GoalsTracker() {
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-yellow-400">Your Path to Success</h2>
                 <button
-                    onClick={goBack}
+                    onClick={withSound(goBack)}
                     className="bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded"
                 >
                     Back

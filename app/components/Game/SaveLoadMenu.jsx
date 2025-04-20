@@ -1,4 +1,6 @@
+"use client"
 import { useGame } from '@/app/context/GameContext';
+import { loadClickSound, playClickSound } from '@/data/audioManager';
 import { deleteSavedGame, hasSavedGame, loadGame, saveGame } from '@/data/saveManager';
 import { useState, useEffect } from 'react';
 
@@ -7,7 +9,24 @@ export default function SaveLoadMenu() {
     const [hasSave, setHasSave] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isLoadingGame, setIsLoadingGame] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+
+    const withSound = (handler) => (event) => {
+        playClickSound();
+        if (handler) {
+            handler(event);
+        }
+    };
+
+    useEffect(() => {
+        loadClickSound('/sounds/click.mp3').then((success) => {
+            if (!success) {
+                console.warn("Can't Load Click Sound");
+            }
+        });
+    }, []);
 
     useEffect(() => {
         // Check if there's a saved game
@@ -15,7 +34,7 @@ export default function SaveLoadMenu() {
     }, []);
 
     const handleSaveGame = async () => {
-        setIsLoading(true);
+        setIsSaving(true);
         setErrorMessage('');
 
         try {
@@ -35,18 +54,26 @@ export default function SaveLoadMenu() {
                 });
             }
         } catch (error) {
-            setErrorMessage(`Error: ${error.message}`);
-            dispatch({
-                type: 'SET_MESSAGE',
-                payload: { text: `Error saving game: ${error.message}` }
-            });
+            // Handle AbortError gracefully
+            if (error.name === 'AbortError') {
+                dispatch({
+                    type: 'SET_MESSAGE',
+                    payload: { text: "Save operation was cancelled." }
+                });
+            } else {
+                setErrorMessage(`Error: ${error.message}`);
+                dispatch({
+                    type: 'SET_MESSAGE',
+                    payload: { text: `Error saving game: ${error.message}` }
+                });
+            }
         } finally {
-            setIsLoading(false);
+            setIsSaving(false);
         }
     };
 
     const handleLoadGame = async () => {
-        setIsLoading(true);
+        setIsLoadingGame(true);
         setErrorMessage('');
 
         try {
@@ -65,13 +92,21 @@ export default function SaveLoadMenu() {
                 });
             }
         } catch (error) {
-            setErrorMessage(`Error: ${error.message}`);
-            dispatch({
-                type: 'SET_MESSAGE',
-                payload: { text: `Error loading game: ${error.message}` }
-            });
+            // Handle AbortError gracefully
+            if (error.name === 'AbortError') {
+                dispatch({
+                    type: 'SET_MESSAGE',
+                    payload: { text: "Load operation was cancelled." }
+                });
+            } else {
+                setErrorMessage(`Error: ${error.message}`);
+                dispatch({
+                    type: 'SET_MESSAGE',
+                    payload: { text: `Error loading game: ${error.message}` }
+                });
+            }
         } finally {
-            setIsLoading(false);
+            setIsLoadingGame(false);
         }
     };
 
@@ -103,7 +138,7 @@ export default function SaveLoadMenu() {
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">Save & Load Game</h2>
                 <button
-                    onClick={closeMenu}
+                    onClick={withSound(closeMenu)}
                     className="bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded"
                 >
                     Close
@@ -119,34 +154,34 @@ export default function SaveLoadMenu() {
 
                 <div className="grid grid-cols-1 gap-4">
                     <button
-                        onClick={handleSaveGame}
-                        disabled={isLoading}
-                        className={`${isLoading
-                                ? "bg-gray-600"
-                                : "bg-green-600 hover:bg-green-500"
+                        onClick={withSound(handleSaveGame)}
+                        disabled={isSaving}
+                        className={`${isSaving
+                            ? "bg-gray-600"
+                            : "bg-green-600 hover:bg-green-500"
                             } text-white py-3 px-4 rounded text-lg`}
                     >
-                        {isLoading ? "Saving..." : "Save Game to File"}
+                        {isSaving ? "Saving..." : "Save Game to File"}
                     </button>
 
                     <button
-                        onClick={handleLoadGame}
-                        disabled={isLoading}
-                        className={`${isLoading
-                                ? "bg-gray-600"
-                                : "bg-blue-600 hover:bg-blue-500"
+                        onClick={withSound(handleLoadGame)}
+                        disabled={isLoadingGame}
+                        className={`${isLoadingGame
+                            ? "bg-gray-600"
+                            : "bg-blue-600 hover:bg-blue-500"
                             } text-white py-3 px-4 rounded text-lg`}
                     >
-                        {isLoading ? "Loading..." : "Load Game from File"}
+                        {isLoadingGame ? "Loading..." : "Load Game from File"}
                     </button>
 
                     {hasSave && !showConfirm ? (
                         <button
-                            onClick={() => setShowConfirm(true)}
-                            disabled={isLoading}
-                            className={`${isLoading
-                                    ? "bg-gray-600"
-                                    : "bg-red-600 hover:bg-red-500"
+                            onClick={withSound(() => setShowConfirm(true))}
+                            disabled={isSaving || isLoadingGame}
+                            className={`${(isSaving || isLoadingGame)
+                                ? "bg-gray-600"
+                                : "bg-red-600 hover:bg-red-500"
                                 } text-white py-3 px-4 rounded text-lg`}
                         >
                             Delete Saved Game Data
@@ -156,15 +191,15 @@ export default function SaveLoadMenu() {
                             <p className="text-yellow-300 mb-2">Are you sure you want to delete your saved game data?</p>
                             <div className="flex gap-2">
                                 <button
-                                    onClick={handleDeleteSave}
-                                    disabled={isLoading}
+                                    onClick={withSound(handleDeleteSave)}
+                                    disabled={isSaving || isLoadingGame}
                                     className="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded flex-1"
                                 >
                                     Yes, Delete
                                 </button>
                                 <button
-                                    onClick={() => setShowConfirm(false)}
-                                    disabled={isLoading}
+                                    onClick={withSound(() => setShowConfirm(false))}
+                                    disabled={isSaving || isLoadingGame}
                                     className="bg-gray-600 hover:bg-gray-500 text-white py-2 px-4 rounded flex-1"
                                 >
                                     Cancel

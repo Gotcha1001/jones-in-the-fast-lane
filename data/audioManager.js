@@ -547,3 +547,32 @@ export const stopHealingCentreMusic = () => {
     healingCentreMusicSource = null;
   }
 };
+
+// audioManager.jsx
+
+// audioManager.jsx
+let clickSound = null;
+
+export const loadClickSound = async (url) => {
+  if (!audioContext) {
+    if (!initAudio()) return false;
+  }
+  try {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    clickSound = audioBuffer;
+    return true;
+  } catch (error) {
+    console.error("Error loading click sound:", error);
+    return false;
+  }
+};
+
+export const playClickSound = () => {
+  if (!audioContext || !clickSound) return;
+  const soundSource = audioContext.createBufferSource();
+  soundSource.buffer = clickSound;
+  soundSource.connect(audioContext.destination);
+  soundSource.start();
+};

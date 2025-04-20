@@ -328,7 +328,7 @@
 // }
 
 import { useGame } from '@/app/context/GameContext';
-import { initAudio, loadLeisureMusic, playLeisureMusic, stopLeisureMusic } from '@/data/audioManager';
+import { initAudio, loadClickSound, loadLeisureMusic, playClickSound, playLeisureMusic, stopLeisureMusic } from '@/data/audioManager';
 import { useState, useEffect } from 'react';
 import FeatureMotionWrapper from '../FramerMotion/FeatureMotionWrapperMap';
 import MotionWrapperDelay from '../FramerMotion/MotionWrapperDelay';
@@ -339,8 +339,20 @@ export default function LeisureCentre() {
     const { player } = state;
     const [selectedActivity, setSelectedActivity] = useState('basic');
 
+    const withSound = (handler) => (event) => {
+        playClickSound()
+        if (handler) {
+            handler(event)
+        }
+    }
+
     useEffect(() => {
         initAudio();
+        loadClickSound('/sounds/click.mp3').then((success) => {
+            if (!success) {
+                console.warn("Failed to load click sound")
+            }
+        })
         loadLeisureMusic('/sounds/leisuresound.mp3').then(() => {
             playLeisureMusic();
         });
@@ -489,7 +501,7 @@ export default function LeisureCentre() {
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold">Python Leisure Centre</h2>
                     <button
-                        onClick={goBackToLocation}
+                        onClick={withSound(goBackToLocation)}
                         className="bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded"
                     >
                         Back
@@ -523,13 +535,6 @@ export default function LeisureCentre() {
 
                     {/* UPDATED gradient similar to healing center */}
                     <div className="mt-4 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 px-6 py-4 rounded-lg shadow-md max-w-xl text-center">
-                        <p className="text-sm italic text-white">
-                            "Welcome to Python Leisure Centre! Take a break from your busy life and enjoy our fantastic facilities. Whether you want to swim, work out, or just relax, we've got you covered!"
-                        </p>
-                    </div>
-
-                    {/* Additional welcome message box like healing center */}
-                    <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 p-3 rounded-lg shadow-md mb-5 mt-5">
                         <p className="text-sm italic text-white">
                             "Welcome to Python Leisure Centre! Take a break from your busy life and enjoy our fantastic facilities. Whether you want to swim, work out, or just relax, we've got you covered!"
                         </p>
@@ -584,7 +589,7 @@ export default function LeisureCentre() {
                                         ? 'gradient-background2 border-2 border-purple-500'
                                         : 'gradient-background2 border-2 border-transparent hover:border-purple-500'
                                         }`}
-                                    onClick={() => handleActivitySelect(activityKey)}
+                                    onClick={withSound(() => handleActivitySelect(activityKey))}
                                 >
                                     <h4 className="font-semibold">{activityValue.name}</h4>
                                     <p className="text-sm text-gray-300">{activityValue.description}</p>
@@ -620,7 +625,7 @@ export default function LeisureCentre() {
                             </div>
                         </div>
                         <button
-                            onClick={handleDoActivity}
+                            onClick={withSound(handleDoActivity)}
                             disabled={player.cash < activities[selectedActivity].cost || player.energy < activities[selectedActivity].energy}
                             className={`w-full py-2 px-4 rounded text-white font-medium ${player.cash >= activities[selectedActivity].cost && player.energy >= activities[selectedActivity].energy
                                 ? 'bg-purple-600 hover:bg-purple-500'

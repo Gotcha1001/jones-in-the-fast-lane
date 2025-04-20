@@ -615,21 +615,6 @@ function gameReducer(state, action) {
         showRandomEvent: false,
       };
 
-    // case "GAME_WON":
-    //   return {
-    //     ...state,
-    //     gameWon: true,
-    //     gameRunning: false,
-    //     viewingStats: false,
-    //     player: {
-    //       ...state.player,
-    //       cash: state.player.cash ?? 200,
-    //       goals: state.player.goals ?? initialState.player.goals,
-    //     },
-    //     message: "🎉 Congratulations! You've won the game! 🎉",
-    //     // Do NOT set currentScreen to "gameOver" yet
-    //   };
-
     case "GAME_WON":
       console.log("gameReducer: GAME_WON triggered for player:", state.player);
       return {
@@ -741,105 +726,6 @@ function gameReducer(state, action) {
         ...state,
         message: null,
       };
-
-    // case "CHECK_GOALS":
-    //   const { player } = state;
-    //   const goals = player.goals;
-    //   const hasWinningJob =
-    //     player.job && goals.winningJobs.includes(player.job.title);
-    //   const hasLuxuryApartment =
-    //     player.rental &&
-    //     player.rental.hasApartment &&
-    //     player.rental.rentAmount === 200;
-    //   const hasGoodHealth = (player.relationship.health || 0) >= 80;
-    //   const hasEnoughHappiness = (player.happiness || 0) >= goals.happiness;
-    //   const subjectLevels = Object.values(player.subjects);
-    //   const educationAverage = subjectLevels.length
-    //     ? Math.floor(
-    //         subjectLevels.reduce((sum, level) => sum + level, 0) /
-    //           subjectLevels.length
-    //       )
-    //     : 0;
-    //   const hasRequiredEducation = educationAverage >= goals.education;
-    //   const hasRequiredSubjects = goals.winningJobs.some((jobTitle) => {
-    //     const job = jobs.find((j) => j.title === jobTitle);
-    //     return Object.entries(job.requiredSubjects).every(
-    //       ([subject, level]) => (player.subjects[subject] || 0) >= level
-    //     );
-    //   });
-    //   const achieved =
-    //     (player.cash || 0) >= goals.cash &&
-    //     hasWinningJob &&
-    //     hasLuxuryApartment &&
-    //     hasGoodHealth &&
-    //     hasEnoughHappiness &&
-    //     hasRequiredEducation &&
-    //     hasRequiredSubjects;
-    //   const progressDetails = {
-    //     cash: {
-    //       current: player.cash || 0,
-    //       target: goals.cash,
-    //       achieved: (player.cash || 0) >= goals.cash,
-    //     },
-    //     job: {
-    //       current: player.job?.title || "None",
-    //       target: goals.winningJobs,
-    //       achieved: hasWinningJob,
-    //     },
-    //     luxury: {
-    //       current:
-    //         player.rental?.rentAmount === 200
-    //           ? "Luxury Apartment"
-    //           : "Not Luxury",
-    //       achieved: hasLuxuryApartment,
-    //     },
-    //     health: {
-    //       current: player.relationship.health || 0,
-    //       target: 80,
-    //       achieved: hasGoodHealth,
-    //     },
-    //     happiness: {
-    //       current: player.happiness || 0,
-    //       target: goals.happiness,
-    //       achieved: hasEnoughHappiness,
-    //     },
-    //     education: {
-    //       current: educationAverage,
-    //       target: goals.education,
-    //       achieved: hasRequiredEducation,
-    //     },
-    //     subjects: {
-    //       current: Object.entries(player.subjects).map(
-    //         ([subject, level]) => `${subject}: ${level}`
-    //       ),
-    //       target: "Required subjects for winning job",
-    //       achieved: hasRequiredSubjects,
-    //     },
-    //   };
-    //   console.log("CHECK_GOALS: Win condition check:", {
-    //     achieved,
-    //     progressDetails,
-    //   });
-    //   if (achieved) {
-    //     return {
-    //       ...state,
-    //       gameWon: true,
-    //       gameRunning: false,
-    //       currentScreen: "gameOver",
-    //       message:
-    //         "🎉 Congratulations! You've won the game by achieving career success, luxury living, and excellent health! 🎉",
-    //       player: {
-    //         ...state.player,
-    //         cash: state.player.cash || 0, // Ensure cash is defined
-    //       },
-    //     };
-    //   }
-    //   return {
-    //     ...state,
-    //     message: "Here's your progress toward victory!",
-    //     currentScreen: "goals",
-    //     progressDetails,
-    //   };
 
     case "CHECK_GOALS":
       const { player } = state;
