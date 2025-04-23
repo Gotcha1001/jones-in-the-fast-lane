@@ -445,6 +445,7 @@ export default function GameContainer() {
             '/professor.jpg', // University
             '/boss.jpg', // Workplace
             '/stone.png', // PathSystem in Map
+            '/stone2.png', // PathSystem in Map
             '/home.jpg', // Apartment
             '/home2.jpg', // Apartment
             '/home3.jpg', // Apartment
@@ -460,6 +461,7 @@ export default function GameContainer() {
             '/logo1.jpg', // UI element
             '/logo2.jpg', // UI element
             '/logo3.jpg', // UI element
+            'https://img.freepik.com/free-photo/dating-office-with-heart-decorations_23-2149193485.jpg', // DatingOffice decoration
         ];
 
         // Preload images by creating Image objects
@@ -493,12 +495,12 @@ export default function GameContainer() {
         // List of all video URLs used in the game
         const videoUrls = [
             'https://cdn.pixabay.com/video/2023/10/10/184469-873483892_tiny.mp4', // University background
+            'https://cdn.pixabay.com/video/2023/02/05/149481-796105914_tiny.mp4', // DatingOffice background
             '/videos/workplacevideo.mp4', // Workplace background
-            '/videos/apartment.mp4',
-            '/videos/bank.mp4',
-            '/videos/leisure.mp4',
-            '/videos/universityvideo.mp4',
-            '/videos/workplacevideo.mp4'
+            '/videos/apartment.mp4', // Apartment background
+            '/videos/bank.mp4', // Bank background
+            '/videos/leisure.mp4', // LeisureCentre background
+            // Note: '/videos/universityvideo.mp4' excluded; include if University uses a local video
         ];
 
         // Preload videos by creating Video elements
@@ -506,8 +508,7 @@ export default function GameContainer() {
             const video = document.createElement('video');
             video.src = url;
             video.preload = 'auto'; // Preload metadata and initial frames
-            // Optionally mute to prevent autoplay issues during preloading
-            video.muted = true;
+            video.muted = true; // Prevent autoplay issues
         });
     }, []); // Empty dependency array ensures this runs only once on mount
 
