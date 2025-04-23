@@ -113,7 +113,6 @@ export default function PathSystem({ locationPositions, player, isWalking, targe
         const segments = [];
         const locationKeys = Object.keys(locationPositions);
         const addedPoints = new Set(); // To avoid duplicates
-
         // Add stones for every path in the network
         locationKeys.forEach(fromId => {
             Object.entries(pathNetwork[fromId].directConnections).forEach(([toId, path]) => {
@@ -124,26 +123,20 @@ export default function PathSystem({ locationPositions, player, isWalking, targe
                         Math.pow(end.x - start.x, 2) +
                         Math.pow(end.y - start.y, 2)
                     );
-
-                    // Determine number of stones based on distance
-                    const steps = Math.max(3, Math.floor(distance / 2));
-
+                    // Ensure at least one stone per segment on mobile
+                    const steps = isMobile ? Math.max(1, Math.floor(distance / 4)) : Math.max(3, Math.floor(distance / 2));
                     for (let step = 0; step <= steps; step++) {
                         const progress = step / steps;
                         const x = start.x + (end.x - start.x) * progress;
                         const y = start.y + (end.y - start.y) * progress;
-
                         // Create a unique identifier for this point
                         const pointId = `${Math.round(x * 10)},${Math.round(y * 10)}`;
-
                         // Only add if we haven't already
                         if (!addedPoints.has(pointId)) {
                             addedPoints.add(pointId);
-
                             // Add some small randomness to make it look natural
                             const jitterX = (Math.random() - 0.5) * 1.5;
                             const jitterY = (Math.random() - 0.5) * 1.5;
-
                             segments.push({
                                 x: x + jitterX,
                                 y: y + jitterY,
@@ -156,10 +149,8 @@ export default function PathSystem({ locationPositions, player, isWalking, targe
                 }
             });
         });
-
         return segments;
-    }, [pathNetwork, locationPositions]);
-
+    }, [pathNetwork, locationPositions, isMobile]);
     return (
         <>
             {/* Stone path */}
