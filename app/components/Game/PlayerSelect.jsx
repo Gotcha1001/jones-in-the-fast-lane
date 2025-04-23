@@ -129,7 +129,7 @@ export default function PlayerSelect() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
-            <SmokeEffect isVisible={true} />
+            {/* <SmokeEffect isVisible={true} /> */}
             <MotionWrapperDelay
                 initial="hidden"
                 whileInView="visible"
